@@ -76,8 +76,8 @@ SRC	= mx_binary_search.c \
   mx_isalpha.c \
   mx_atoll.c \
   mx_get_index.c \
-  mx_realloc.c \
-  mx_print_unicode.c \
+  #mx_realloc.c \
+  #mx_print_unicode.c \
 
 SRCS	=	$(addprefix $(SRCD)/, $(SRC))
 OBJS	=	$(addprefix $(OBJD)/, $(SRC:%.c=%.o))
@@ -104,3 +104,6 @@ uninstall: clean
 	@rm -rf $(NAME)
 
 reinstall: uninstall install
+
+start_i: install
+	$(COMP) $(CFLG) main.c libmx.a && .\a.exe
