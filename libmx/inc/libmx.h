@@ -6,7 +6,8 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <stdbool.h>
-#include <malloc/malloc.h>
+#include <stdio.h> // убрать потом
+//#include <malloc/malloc.h>
 
 typedef struct s_list {
     void *data;
@@ -17,7 +18,7 @@ int mx_get_index(char **strarr, char *str);
 long long mx_atoll(const char *str);
 bool mx_isalpha(int c);
 void mx_printerr(const char *s);
-int mx_sscanf(const char *str, const char *format, char *city1, char *city2, int *distance);
+int mx_sscanf(const char *str, const char *format, char *flag, char *directory);
 int mx_atoi(const char *str);
 void mx_printchar(const char c);
 void mx_swap_char(char *s1, char *s2);
