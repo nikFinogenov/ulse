@@ -1,74 +1,80 @@
-#include "../inc/uls.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <uls.h>
 
-void usage() {
-    fprintf(stderr, "usage: uls [-l] [file ...]\n");
-    exit(1);
+int compare_names(const void *a, const void *b) {
+    return strcmp(*(const char **)a, *(const char **)b);
 }
 
-void error(char *msg) {
-    perror(msg);
-    exit(1);
-}
+void print_multicolumn(const char *dirname) {
+    struct dirent *dir_entry;
+    char **files = NULL;
+    int num_files = 0;
 
-void list_file(char *filename, int long_format) {
-    struct stat buf;
-    if (stat(filename, &buf) == -1) {
-        fprintf(stderr, "uls: cannot access %s: No such file or directory\n", filename);
-        return;
+    DIR *dir = opendir(dirname);
+    if (dir == NULL) {
+        perror("opendir");
+        exit(EXIT_FAILURE);
     }
 
-    if (long_format) {
-        struct passwd *pwd;
-        struct group *grp;
-        char timebuf[100];
-
-        pwd = getpwuid(buf.st_uid);
-        grp = getgrgid(buf.st_gid);
-
-        strftime(timebuf, sizeof(timebuf), "%Y-%m-%d %H:%M", localtime(&buf.st_mtime));
-
-        printf("%c", (buf.st_mode & S_IFDIR) ? 'd' : '-');
-        printf("%c", (buf.st_mode & S_IRUSR) ? 'r' : '-');
-        printf("%c", (buf.st_mode & S_IWUSR) ? 'w' : '-');
-        printf("%c", (buf.st_mode & S_IXUSR) ? 'x' : '-');
-        printf("%c", (buf.st_mode & S_IRGRP) ? 'r' : '-');
-        printf("%c", (buf.st_mode & S_IWGRP) ? 'w' : '-');
-        printf("%c", (buf.st_mode & S_IXGRP) ? 'x' : '-');
-        printf("%c", (buf.st_mode & S_IROTH) ? 'r' : '-');
-        printf("%c", (buf.st_mode & S_IWOTH) ? 'w' : '-');
-        printf("%c", (buf.st_mode & S_IXOTH) ? 'x' : '-');
-
-        printf(" %ld ", (long)buf.st_nlink);
-        printf("%s ", pwd->pw_name);
-        printf("%s ", grp->gr_name);
-        printf("%lld ", (long long)buf.st_size);
-        printf("%s ", timebuf);
+    while ((dir_entry = readdir(dir)) != NULL) {
+        if (dir_entry->d_name[0] != '.') {
+            files = realloc(files, (num_files + 1) * sizeof(char *));
+            files[num_files] = strdup(dir_entry->d_name);
+            num_files++;
+        }
     }
 
-    printf("%s\n", filename);
+    closedir(dir);
+
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    int terminal_width = w.ws_col; // Get terminal width using ioctl
+
+    if (num_files > 0) {
+        qsort(files, num_files, sizeof(char *), compare_names);
+
+        int max_name_length = 0;
+        for (int i = 0; i < num_files; ++i) {
+            int name_length = strlen(files[i]);
+            if (name_length > max_name_length) {
+                max_name_length = name_length;
+            }
+        }
+
+        int num_columns = terminal_width / (max_name_length + 2); // 2 spaces between columns
+        int column_width = (terminal_width + 2) / num_columns - 2; // Calculate column width dynamically
+
+        int rows = (num_files + num_columns - 1) / num_columns;
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < num_columns; ++j) {
+                int index = i + j * rows;
+                if (index < num_files) {
+                    printf("%-*s \t", column_width, files[index]);
+                }
+            }
+            printf("\n");
+        }
+
+        for (int i = 0; i < num_files; ++i) {
+            free(files[i]);
+        }
+        free(files);
+    }
 }
 
 int main(int argc, char *argv[]) {
-    int opt;
-    int long_format = 0;
-
-    while ((opt = getopt(argc, argv, "l")) != -1) {
-        switch (opt) {
-            case 'l':
-                long_format = 1;
-                break;
-            default:
-                usage();
-        }
-    }
-
-    if (optind >= argc) {
-        list_file(".", long_format);
+    const char *dirname;
+    if (argc == 1) {
+        dirname = "."; // Use current directory if no argument is provided
+    } else if (argc == 2) {
+        dirname = argv[1];
     } else {
-        for (int i = optind; i < argc; i++) {
-            list_file(argv[i], long_format);
-        }
+        fprintf(stderr, "Usage: %s [directory]\n", argv[0]);
+        exit(EXIT_FAILURE);
     }
+
+    print_multicolumn(dirname);
 
     return 0;
 }

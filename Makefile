@@ -1,44 +1,47 @@
-NAME	=	uls
+NAME = uls
+FLAG = -std=c11 -Wall -Wextra -Werror -Wpedantic
+SRCD = src
+INCD = inc
+OBJD = obj
 
-CFLG	=	-std=c11 $(addprefix -W, all extra error pedantic) -g
+LMXA := libmx/libmx.a
+LMXI := libmx/inc
 
-SRC_DIR	= src
-INC_DIR	= inc
-OBJ_DIR	= obj
+INC  = uls.h
+INCS = $(addprefix $(INCD)/, $(INC))
 
-INC_FILES = $(wildcard $(INC_DIR)/*.h)
-SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
-OBJ_FILES = $(addprefix $(OBJ_DIR)/, $(notdir $(SRC_FILES:%.c=%.o)))
 
-LMX_DIR	= libmx
-LMX_A:=	$(LMX_DIR)/libmx.a
-LMX_INC:= $(LMX_DIR)/inc
+SRC = $(wildcard $(SRCD)/*.c)
+
+OBJS = $(patsubst $(SRCD)/%.c, $(OBJD)/%.o, $(SRC))
 
 all: install
 
-install: $(LMX_A) $(NAME)
+install: $(LMXA) $(NAME)
 
-$(NAME): $(OBJ_FILES)
-	@clang $(CFLG) $(OBJ_FILES) -L$(LMX_DIR) -lmx -o $@
+$(NAME): $(OBJS)
+	@clang $(FLAG) $(OBJS) $(LMXA) -o $@
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INC_FILES)
-	@clang $(CFLG) -c $< -o $@ -I$(INC_DIR) -I$(LMX_INC)
+$(OBJD)/%.o: $(SRCD)/%.c $(INCS)
+	@clang $(FLAG) -c $< -o $@ -I$(INCD) -I$(LMXI)
 
-$(OBJ_FILES): | $(OBJ_DIR)
+$(OBJS): | $(OBJD)
 
-$(OBJ_DIR):
+$(OBJD):
 	@mkdir -p $@
 
-$(LMX_A):
-	@make -sC $(LMX_DIR)
-	
-clean:
-	@rm -rf $(OBJ_DIR)
-	@make clean -sC $(LMX_DIR)
+$(LMXA):
+	@make -sC libmx
 
-uninstall:
-	@make -sC $(LMX_DIR) $@
-	@rm -rf $(OBJ_DIR)
+clean:
+	@make -sC libmx $@
+	@rm -rf $(OBJD)
+
+uninstall: clean
+	@make -sC libmx $@
 	@rm -rf $(NAME)
 
-reinstall: uninstall all
+reinstall: uninstall install
+
+start: clean install
+	uls ./temp
