@@ -1,1 +1,11 @@
+.DS_Store
+._.DS_Store
+*.o
+*.out
+*.a
+*.exe
 .vscode
+.idea
+obj
+test
+temp
