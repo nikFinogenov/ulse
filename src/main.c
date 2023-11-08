@@ -5,7 +5,17 @@
 int compare_names(const void *a, const void *b) {
     return strcmp(*(const char **)a, *(const char **)b);
 }
+void print_tab_aligned_columns(int width, int tab_width) {
+    int tabs = (width + tab_width - 1) / tab_width;
 
+    for (int i = 0; i < tabs; i++) {
+        if (tab_width == 1) {
+            mx_printchar(' ');
+        } else {
+            mx_printchar('\t');
+        }
+    }
+}
 void print_multicolumn(const char *dirname) {
     struct dirent *dir_entry;
     char **files = NULL;
@@ -27,9 +37,12 @@ void print_multicolumn(const char *dirname) {
 
     closedir(dir);
 
-    struct winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-    int terminal_width = w.ws_col; // Get terminal width using ioctl
+    int terminal_width = 80;
+    if (isatty(1)) {
+        struct winsize w;
+        ioctl(0, TIOCGWINSZ, &w);
+        terminal_width = w.ws_col;
+    }
 
     if (num_files > 0) {
         qsort(files, num_files, sizeof(char *), compare_names);
@@ -41,17 +54,25 @@ void print_multicolumn(const char *dirname) {
                 max_name_length = name_length;
             }
         }
-
-        int num_columns = terminal_width / (max_name_length + 2); // 2 spaces between columns
-        int column_width = (terminal_width + 2) / num_columns - 2; // Calculate column width dynamically
-
+        int tab = 8;
+        int width = (max_name_length + tab) & ~(tab - 1);
+        int num_columns = terminal_width / width;
+        int index = 0;
         int rows = (num_files + num_columns - 1) / num_columns;
         for (int i = 0; i < rows; ++i) {
+            index = i;
             for (int j = 0; j < num_columns; ++j) {
-                int index = i + j * rows;
                 if (index < num_files) {
-                    printf("%-*s \t", column_width, files[index]);
+                    mx_printstr(files[index]);
+                    int tabs = (width - mx_strlen(files[index]) + tab - 1) / tab;
+                    for (int i = 0; i < tabs; i++) {
+                        if (tab == 1) 
+                            mx_printchar(' ');
+                        else
+                            mx_printchar('\t');
+                    }
                 }
+                index = index + rows;
             }
             printf("\n");
         }
