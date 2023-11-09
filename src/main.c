@@ -20,7 +20,7 @@ void print_multicolumn(const char *dirname) {
     while ((dir_entry = readdir(dir)) != NULL) {
         if (dir_entry->d_name[0] != '.') {
             files = realloc(files, (num_files + 1) * sizeof(char *));
-            files[num_files] = strdup(dir_entry->d_name);
+            files[num_files] = mx_strdup(dir_entry->d_name);
             num_files++;
         }
     }

@@ -7,7 +7,9 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdio.h> // убрать потом
-//#include <malloc/malloc.h>
+#include <malloc.h>
+
+#define malloc_size malloc_usable_size
 
 typedef struct s_list {
     void *data;

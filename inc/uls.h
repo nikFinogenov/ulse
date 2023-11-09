@@ -17,6 +17,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <libmx.h>
+#include <string.h>
 
 
 typedef struct uls_stat_s {
