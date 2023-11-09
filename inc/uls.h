@@ -29,39 +29,39 @@ typedef struct uls_stat_s {
 
 
 typedef struct s_flags_n{
-    bool a;
-    bool A;
-    bool l;
-    bool r;
-    bool R;
-    bool t;
-    bool u;
-    bool c;
-    bool G;
-    bool h;
-    bool e;
-    bool i;
-    bool T;
-    bool x;
-    bool p;
-    bool d;
-    bool f;
-    bool n;
-    bool g;
-    bool o;
-    bool L;
-    bool F;
-    bool one;
-    bool C;
-    bool B;
-    bool s;
-    bool S;
-    bool X;
-    bool v;
-    bool w;
-    bool D;
-    bool P;
-    bool Q;
+    bool a; // Flag for option 'a': Usually stands for "all", showing hidden files.
+    bool A; // Flag for option 'A': Lists all entries except for '.' and '..'.
+    bool l; // Flag for option 'l': Long format, showing detailed file information.
+    bool r; // Flag for option 'r': Reverse the order of listing.
+    bool R; // Flag for option 'R': Recursively list subdirectories.
+    bool t; // Flag for option 't': Sort by modification time, showing the newest first.
+    bool u; // Flag for option 'u': Sort by access time, showing the newest first.
+    bool c; // Flag for option 'c': Sort by change time, showing the newest first.
+    bool G; // Flag for option 'G': Enable colored output.
+    bool h; // Flag for option 'h': Human-readable file sizes (e.g., in KB, MB).
+    bool e; // Flag for option 'e': Display the escape sequences for control characters.
+    bool i; // Flag for option 'i': Show the file's inode number.
+    bool S; // Flag for option 'S': Sort by file size, showing the largest first.
+    bool T; // Flag for option 'T': Display full time information.
+    bool x; // Flag for option 'x': List entries by lines, rather than columns.
+    bool p; // Flag for option 'p': Add a trailing '/' to directory names.
+    bool d; // Flag for option 'd': List the directory itself, rather than its contents.
+    bool f; // Flag for option 'f': Disable sorting, and list entries in the order they appear.
+    bool n; // Flag for option 'n': List numeric user and group IDs instead of names.
+    bool g; // Flag for option 'g': Like 'l', but excludes the owner.
+    bool o; // Flag for option 'o': Like 'l', but excludes the group.
+    bool L; // Flag for option 'L': Follow symbolic links when listing.
+    bool F; // Flag for option 'F': Append a character to entries to indicate their type.
+    bool one; // Flag for option '1': List one entry per line.
+    bool C; // Flag for option 'C': Force multi-column output.
+    bool B; // Flag for option 'B': Disable line wrapping, useful for long filenames.
+    bool s; // Flag for option 's': Show the size of each file in blocks.
+    bool X; // Flag for option 'X': Sort alphabetically by entry extension.
+    bool v; // Flag for option 'v': Show version information.
+    bool w; // Flag for option 'w': List in wide format, with more details.
+    bool D; // Flag for option 'D': Show the time in the format specified by the environment variable.
+    bool P; // Flag for option 'P': Show permissions of the listed files.
+    bool Q; // Flag for option 'Q': Quote file names, useful for special characters in names.
 } s_flags_t;
 
 typedef struct {

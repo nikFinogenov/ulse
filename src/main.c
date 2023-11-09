@@ -50,7 +50,6 @@ static void print_multicolumn(const char *dirname) {
     }
 
     if (num_files > 0) {
-        // qsort(files, num_files, sizeof(char *), compare_names);
         custom_qsort(files, num_files, sizeof(char *), compare_names);
 
         int max_name_length = 0;
