@@ -47,7 +47,7 @@ void initFalseFlags(s_flags_t *flags) {
     flags->Q = false;
     flags->at = false;
 }
-void recursive_flag(char *path, s_flags_t *flags) {
+void recursive_flag(const char *path, s_flags_t *flags) {
     DIR *dir;
     struct dirent *entry;
 
@@ -111,10 +111,10 @@ int main(int argc, char *argv[]) {
     else{
         if(flags.C)
             print_multicolumn(dirname);
-        else if (flags.one)
-            print_perline(dirname);
-        else if (flags.R) {
+        else if (flags.R)
             recursive_flag(dirname, &flags);
+        else if (flags.one) {
+            print_perline(dirname);
         }
     }
     return 0;
