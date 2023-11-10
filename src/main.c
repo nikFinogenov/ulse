@@ -168,6 +168,9 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                     case '1':
                         flags->one = true;
                         break;
+                    case '@':
+                        flags->at = true;
+                        break;
                     case 'C':
                         flags->C = true;
                         break;
@@ -219,7 +222,7 @@ bool separate_flags(int argc, char *argv[]) {
     return false;
 }
 
-void recursive_flag(char *path, s_flags_t *flags) {
+void recursive_flag(const char *path, s_flags_t *flags) {
     DIR *dir;
     struct dirent *entry;
 
@@ -284,6 +287,7 @@ void printTrueFlags(const s_flags_t *flags) {
     if (flags->L) printf("L ");
     if (flags->F) printf("F ");
     if (flags->one) printf("1 ");
+    if (flags->at) printf("@ ");
     if (flags->C) printf("C ");
     if (flags->B) printf("B ");
     if (flags->s) printf("s ");
@@ -304,12 +308,10 @@ int main(int argc, char *argv[]) {
     int count = 0;
     if (argc >= 2 && argv[1][0] == '-') { 
         count = parse_args(argc, argv, &flags);
-        printf("%d\n", count);
         with_flags = true;
-        printTrueFlags(&flags);
         dirname = argv[count + 1];
         if (flags.R) {
-            //recursive_flag(".", &flags);
+            recursive_flag(dirname, &flags);
         }
         
     } 

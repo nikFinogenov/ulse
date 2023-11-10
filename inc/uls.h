@@ -51,6 +51,7 @@ typedef struct s_flags_n{
     bool L; // Flag for option 'L': Follow symbolic links when listing.
     bool F; // Flag for option 'F': Append a character to entries to indicate their type.
     bool one; // Flag for option '1': List one entry per line.
+    bool at;
     bool C; // Flag for option 'C': Force multi-column output.
     bool B; // Flag for option 'B': Disable line wrapping, useful for long filenames.
     bool s; // Flag for option 's': Show the size of each file in blocks.
