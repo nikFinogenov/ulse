@@ -47,6 +47,45 @@ void initFalseFlags(s_flags_t *flags) {
     flags->Q = false;
     flags->at = false;
 }
+void recursive_flag(char *path, s_flags_t *flags) {
+    DIR *dir;
+    struct dirent *entry;
+
+    if (!(dir = opendir(path))) {
+        perror("opendir");
+        return;
+    }
+
+
+    // First, list all files and directories in the current directory
+    if (flags->one) {
+        printf("%s:\n", path);
+        while ((entry = readdir(dir)) != NULL) {
+            if (entry->d_name[0] == '.') // Skip hidden files
+                continue;
+
+            printf("%s\n", entry->d_name);
+        }
+    }
+
+    // Then, rewind the directory stream to start from the beginning
+    rewinddir(dir);
+
+    // Now, process directories recursively
+    if (flags->one) {
+        while ((entry = readdir(dir)) != NULL) {
+            if (entry->d_name[0] == '.' || entry->d_type != DT_DIR) // Skip hidden files and non-directories
+                continue;
+
+            printf("\n");
+            char sub_path[1024];
+            snprintf(sub_path, sizeof(sub_path), "%s/%s", path, entry->d_name);
+            recursive_flag(sub_path, flags);
+        }
+    }
+
+    closedir(dir);
+}
 
 int main(int argc, char *argv[]) {
     const char *dirname;
@@ -74,6 +113,9 @@ int main(int argc, char *argv[]) {
             print_multicolumn(dirname);
         else if (flags.one)
             print_perline(dirname);
+        else if (flags.R) {
+            recursive_flag(dirname, &flags);
+        }
     }
     return 0;
 }

@@ -1,5 +1,5 @@
 NAME = uls
-FLAG = -std=c11 -Wall -Wextra -Werror -Wpedantic
+FLAG = -std=c11 -Wall -Wextra -Werror -Wpedantic -D_DEFAULT_SOURCE
 SRCD = src
 INCD = inc
 OBJD = obj
