@@ -1,8 +1,7 @@
-
 #ifndef ULS_H
-
 #define ULS_H
 
+#include "libmx.h"
 #include <dirent.h>
 #include <time.h>
 #include <sys/stat.h>
@@ -16,10 +15,9 @@
 #include <dirent.h>
 #include <string.h>
 #include <unistd.h>
-#include <libmx.h>
 #include <string.h>
 
-#define MAX_FLAGS 33
+#define MAX_FLAGS 34
 
 typedef struct uls_stat_s {
     unsigned long size;
@@ -53,6 +51,7 @@ typedef struct s_flags_n{
     bool L; // Flag for option 'L': Follow symbolic links when listing.
     bool F; // Flag for option 'F': Append a character to entries to indicate their type.
     bool one; // Flag for option '1': List one entry per line.
+    bool at; //Flag for option '@': Extended attribute keys.
     bool C; // Flag for option 'C': Force multi-column output.
     bool B; // Flag for option 'B': Disable line wrapping, useful for long filenames.
     bool s; // Flag for option 's': Show the size of each file in blocks.
@@ -69,5 +68,9 @@ typedef struct {
     int order;
 } s_flag_order_t;
 
+
+int parse_args(int argc, char *argv[], s_flags_t *flags);
+void print_multicolumn(const char *dirname);
+void print_perline(const char *dirname);
 
 #endif
