@@ -89,8 +89,9 @@ static void print_multicolumn(const char *dirname) {
     }
 }
 
-void parse_args(int argc, char *argv[], s_flags_t *flags) {
+int parse_args(int argc, char *argv[], s_flags_t *flags) {
     int i;
+    int count = 0;
     for (i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
             for (int j = 1; argv[i][j]; j++) {
@@ -200,10 +201,11 @@ void parse_args(int argc, char *argv[], s_flags_t *flags) {
                 }
             }
         } else {
-            // assume the rest of the arguments are filenames
             break;
         }
+        count++;
     }
+    return count;
 }
 
 bool separate_flags(int argc, char *argv[]) {
@@ -217,15 +219,98 @@ bool separate_flags(int argc, char *argv[]) {
     return false;
 }
 
+void recursive_flag(char *path, s_flags_t *flags) {
+    DIR *dir;
+    struct dirent *entry;
+
+    if (!(dir = opendir(path))) {
+        perror("opendir");
+        return;
+    }
+
+
+    // First, list all files and directories in the current directory
+    if (flags->one) {
+        printf("%s:\n", path);
+        while ((entry = readdir(dir)) != NULL) {
+            if (entry->d_name[0] == '.') // Skip hidden files
+                continue;
+
+            printf("%s\n", entry->d_name);
+        }
+    }
+
+    // Then, rewind the directory stream to start from the beginning
+    rewinddir(dir);
+
+    // Now, process directories recursively
+    if (flags->one) {
+        while ((entry = readdir(dir)) != NULL) {
+            if (entry->d_name[0] == '.' || entry->d_type != DT_DIR) // Skip hidden files and non-directories
+                continue;
+
+            printf("\n");
+            char sub_path[1024];
+            snprintf(sub_path, sizeof(sub_path), "%s/%s", path, entry->d_name);
+            recursive_flag(sub_path, flags);
+        }
+    }
+
+    closedir(dir);
+}
+
+void printTrueFlags(const s_flags_t *flags) {
+    if (flags->a) printf("a ");
+    if (flags->A) printf("A ");
+    if (flags->l) printf("l ");
+    if (flags->r) printf("r ");
+    if (flags->R) printf("R ");
+    if (flags->t) printf("t ");
+    if (flags->u) printf("u ");
+    if (flags->c) printf("c ");
+    if (flags->G) printf("G ");
+    if (flags->h) printf("h ");
+    if (flags->e) printf("e ");
+    if (flags->i) printf("i ");
+    if (flags->S) printf("S ");
+    if (flags->T) printf("T ");
+    if (flags->x) printf("x ");
+    if (flags->p) printf("p ");
+    if (flags->d) printf("d ");
+    if (flags->f) printf("f ");
+    if (flags->n) printf("n ");
+    if (flags->g) printf("g ");
+    if (flags->o) printf("o ");
+    if (flags->L) printf("L ");
+    if (flags->F) printf("F ");
+    if (flags->one) printf("1 ");
+    if (flags->C) printf("C ");
+    if (flags->B) printf("B ");
+    if (flags->s) printf("s ");
+    if (flags->X) printf("X ");
+    if (flags->v) printf("v ");
+    if (flags->w) printf("w ");
+    if (flags->D) printf("D ");
+    if (flags->P) printf("P ");
+    if (flags->Q) printf("Q ");
+    printf("\n");
+}
 
 
 int main(int argc, char *argv[]) {
     const char *dirname;
     s_flags_t flags;
     bool with_flags = false;
-    if (argc == 2 && argv[1][0] == '-') { 
-        parse_args(argc, argv, &flags);
+    int count = 0;
+    if (argc >= 2 && argv[1][0] == '-') { 
+        count = parse_args(argc, argv, &flags);
+        printf("%d\n", count);
         with_flags = true;
+        printTrueFlags(&flags);
+        dirname = argv[count + 1];
+        if (flags.R) {
+            //recursive_flag(".", &flags);
+        }
         
     } 
 

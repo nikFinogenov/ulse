@@ -19,8 +19,6 @@
 #include <libmx.h>
 #include <string.h>
 
-#define MAX_FLAGS 33
-
 typedef struct uls_stat_s {
     unsigned long size;
     unsigned long n_blks;
