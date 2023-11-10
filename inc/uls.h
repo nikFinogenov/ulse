@@ -72,5 +72,7 @@ typedef struct {
 int parse_args(int argc, char *argv[], s_flags_t *flags);
 void print_multicolumn(const char *dirname);
 void print_perline(const char *dirname);
+int compare_names(const void *a, const void *b);
+void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*comparator)(const void *, const void *));
 
 #endif
