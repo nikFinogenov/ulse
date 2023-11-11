@@ -53,36 +53,44 @@ void recursive_flag(const char *path, s_flags_t *flags) {
 
     if (!(dir = opendir(path))) {
         perror("opendir");
+        mx_printstr(path);
+        mx_printchar('\n');
         return;
     }
 
-
-    // First, list all files and directories in the current directory
-    if (flags->one) {
-        printf("%s:\n", path);
-        while ((entry = readdir(dir)) != NULL) {
-            if (entry->d_name[0] == '.') // Skip hidden files
-                continue;
-
-            printf("%s\n", entry->d_name);
-        }
-    }
+    if(flags->C)
+        print_multicolumn(path, flags);
+    else if (flags->one)
+        print_perline(path, flags);
+    else 
+        print_multicolumn(path, flags);
 
     // Then, rewind the directory stream to start from the beginning
-    rewinddir(dir);
+    closedir(dir);
+    dir = opendir(path);
 
     // Now, process directories recursively
-    if (flags->one) {
+    // if (flags->one) {
         while ((entry = readdir(dir)) != NULL) {
             if (entry->d_name[0] == '.' || entry->d_type != DT_DIR) // Skip hidden files and non-directories
                 continue;
 
             printf("\n");
-            char sub_path[1024];
-            snprintf(sub_path, sizeof(sub_path), "%s/%s", path, entry->d_name);
+            char *sub_path;
+            if (path[mx_strlen(path) - 1] == '/')
+                sub_path = mx_strjoin(path, entry->d_name);
+            else {
+                sub_path = mx_strjoin(mx_strjoin(path, "/"), entry->d_name);
+            }
+            mx_printstr(path);
+            mx_printchar('/');
+            mx_printstr(entry->d_name);
+            mx_printchar(':');
+            mx_printchar('\n');
+            // snprintf(sub_path, sizeof(sub_path), "%s%s", path, entry->d_name);
             recursive_flag(sub_path, flags);
         }
-    }
+    // }
 
     closedir(dir);
 }
@@ -91,11 +99,16 @@ int main(int argc, char *argv[]) {
     const char *dirname;
     s_flags_t flags;
     initFalseFlags(&flags);
-    bool with_flags = false;
+    // bool with_flags = false;
+    // bool with_dir = false;
     if (argc >= 2 && argv[1][0] == '-') { 
         int count = parse_args(argc, argv, &flags);
-        with_flags = true;
-        dirname = argv[count + 1];
+        // with_flags = true;
+        if (count == argc - 1) dirname = ".";
+        else{
+            dirname = argv[count + 1];
+            // with_dir = true;
+        }
     } 
     else if (argc == 1) {
         dirname = "."; // Use current directory if no argument is provided
@@ -105,17 +118,19 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: %s [directory]\n", argv[0]);
         exit(EXIT_FAILURE);
     }
-    if (!with_flags){
-        print_multicolumn(dirname);
-    }
-    else{
-        if(flags.C)
-            print_multicolumn(dirname);
-        else if (flags.R)
+    // if (!with_flags){
+    //     print_multicolumn(dirname, &flags);
+    // }
+    // else{
+        if(flags.R)
             recursive_flag(dirname, &flags);
+        else if (flags.C)
+            print_multicolumn(dirname, &flags);
         else if (flags.one) {
-            print_perline(dirname);
+            print_perline(dirname, &flags);
         }
-    }
+        else
+            print_multicolumn(dirname, &flags);
+    // }
     return 0;
 }
