@@ -95,6 +95,85 @@ void recursive_flag(const char *path, s_flags_t *flags) {
     closedir(dir);
 }
 
+void ls_l(const char *path) {
+    DIR *dir;
+    struct dirent *entry;
+    struct stat sb;
+    char file_path[1024];
+
+    if (!(dir = opendir(path))) {
+        perror("Cannot open directory");
+        return;
+    }
+
+    printf("total ");
+    
+    // Calculate total blocks
+    int total_blocks = 0;
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_name[0] == '.') continue;
+
+        snprintf(file_path, sizeof(file_path), "%s/%s", path, entry->d_name);
+
+        if (lstat(file_path, &sb) == -1) {
+            perror("Cannot get file information");
+            continue;
+        }
+        total_blocks += (int)(sb.st_blocks / 2);
+    }
+    closedir(dir);
+    printf("%d\n", total_blocks);
+
+    // Reopen directory
+    if (!(dir = opendir(path))) {
+        perror("Cannot open directory");
+        return;
+    }
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_name[0] == '.') continue;
+
+        snprintf(file_path, sizeof(file_path), "%s/%s", path, entry->d_name);
+
+        if (lstat(file_path, &sb) == -1) {
+            perror("Cannot get file information");
+            continue;
+        }
+
+        printf("%c%c%c%c%c%c%c%c%c%c ",
+            (S_ISDIR(sb.st_mode)) ? 'd' : '-',
+            (sb.st_mode & S_IRUSR) ? 'r' : '-',
+            (sb.st_mode & S_IWUSR) ? 'w' : '-',
+            (sb.st_mode & S_IXUSR) ? 'x' : '-',
+            (sb.st_mode & S_IRGRP) ? 'r' : '-',
+            (sb.st_mode & S_IWGRP) ? 'w' : '-',
+            (sb.st_mode & S_IXGRP) ? 'x' : '-',
+            (sb.st_mode & S_IROTH) ? 'r' : '-',
+            (sb.st_mode & S_IWOTH) ? 'w' : '-',
+            (sb.st_mode & S_IXOTH) ? 'x' : '-');
+
+        printf("%2d ", (int)sb.st_nlink);
+
+        struct passwd *pw = getpwuid(sb.st_uid);
+        struct group *gr = getgrgid(sb.st_gid);
+
+        printf("%s %s ", pw->pw_name, gr->gr_name);
+
+        printf("%7ld ", (long)sb.st_size);
+
+        struct tm *timeinfo;
+        timeinfo = localtime(&sb.st_mtime);
+        char buffer[80];
+        strftime(buffer, sizeof(buffer), "%b %d %H:%M", timeinfo);
+        printf("%s ", buffer);
+
+        printf("%s\n", entry->d_name);
+    }
+
+    closedir(dir);
+}
+
+
 int main(int argc, char *argv[]) {
     const char *dirname;
     s_flags_t flags;
@@ -124,6 +203,8 @@ int main(int argc, char *argv[]) {
     // else{
         if(flags.R)
             recursive_flag(dirname, &flags);
+        else if (flags.l)
+            ls_l(dirname);
         else if (flags.C)
             print_multicolumn(dirname, &flags);
         else if (flags.one) {
