@@ -14,6 +14,8 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                         break;
                     case 'l':
                         flags->l = true;
+                        flags->C = false;
+                        flags->one = false;
                         break;
                     case 'r':
                         flags->r = true;
@@ -78,6 +80,7 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                     case '1':
                         flags->one = true;
                         flags->C = false;
+                        flags->l = false;
                         break;
                     case '@':
                         flags->at = true;
@@ -85,6 +88,7 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                     case 'C':
                         flags->C = true;
                         flags->one = false;
+                        flags->l = false;
                         break;
                     case 'B':
                         flags->B = true;

@@ -21,8 +21,9 @@ void recursive_flag(const char *path, s_flags_t *flags) {
         mx_printchar('\n');
         return;
     }
-
-    if(flags->C)
+    if (flags->l)
+        print_longlist(path, flags);
+    else if(flags->C)
         print_multicolumn(path, flags);
     else if (flags->one)
         print_perline(path, flags);
@@ -90,21 +91,7 @@ int main(int argc, char *argv[]) {
         if(flags.R)
             recursive_flag(dirname, &flags);
         else if (flags.l) {
-                int count;
-                FileEntry *file_entries = fill_file_entries(dirname, &count);
-                if (file_entries == NULL) {
-                    return 1;
-                }
-
-                // Сортируем массив по именам
-                custom_qsort(file_entries, count, sizeof(FileEntry), compare_file_entries);
-
-                // Выводим отсортированный массив
-                print_file_entries(file_entries, count);
-
-                // Освобождаем память для массива
-                free(file_entries);
-                // print_longlist(dirname, &flags);
+            print_longlist(dirname, &flags);
         }
         else if (flags.C)
             print_multicolumn(dirname, &flags);
