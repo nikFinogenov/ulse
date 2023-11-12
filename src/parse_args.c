@@ -77,12 +77,14 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                         break;
                     case '1':
                         flags->one = true;
+                        flags->C = false;
                         break;
                     case '@':
                         flags->at = true;
                         break;
                     case 'C':
                         flags->C = true;
+                        flags->one = false;
                         break;
                     case 'B':
                         flags->B = true;
