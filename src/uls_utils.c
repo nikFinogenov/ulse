@@ -177,29 +177,3 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
 
     return file_entries;
 }
-
-void print_file_entries(FileEntry *file_entries, int count) {
-    int max_ln_len = 0;
-    for (int i = 0; i < count; ++i) {
-        int x = file_entries[i].nlinks;
-        int len = 1;
-        while ((x /=10) > 0) len++;
-        if (len > max_ln_len) max_ln_len = len; 
-    }
-    for (int i = 0; i < count; ++i) {
-        printf("%c%2s %*d %s  %s%7ld %s %s%s%s\n",
-               file_entries[i].type,
-               file_entries[i].permissions,
-               (file_entries[i].nlinks) ? max_ln_len : 2, // Используйте %*d для динамической ширины поля
-               file_entries[i].nlinks,
-               file_entries[i].owner,
-               file_entries[i].group,
-               file_entries[i].size, // Используйте явное приведение к long для %ld
-               file_entries[i].modification_time,
-               file_entries[i].name,
-               (file_entries[i].type == 'l' ? " -> " : ""),
-               (file_entries[i].type == 'l' ? file_entries[i].symlink : ""));
-
-        free(file_entries[i].name);  // Освобождаем память для каждого имени
-    }
-}
