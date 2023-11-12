@@ -11,42 +11,6 @@ bool separate_flags(int argc, char *argv[]) {
     return false;
 }
 
-void initFalseFlags(s_flags_t *flags) {
-    flags->a = false;
-    flags->A = false;
-    flags->l = false;
-    flags->r = false;
-    flags->R = false;
-    flags->t = false;
-    flags->u = false;
-    flags->c = false;
-    flags->G = false;
-    flags->h = false;
-    flags->e = false;
-    flags->i = false;
-    flags->S = false;
-    flags->T = false;
-    flags->x = false;
-    flags->p = false;
-    flags->d = false;
-    flags->f = false;
-    flags->n = false;
-    flags->g = false;
-    flags->o = false;
-    flags->L = false;
-    flags->F = false;
-    flags->one = false;
-    flags->C = false;
-    flags->B = false;
-    flags->s = false;
-    flags->X = false;
-    flags->v = false;
-    flags->w = false;
-    flags->D = false;
-    flags->P = false;
-    flags->Q = false;
-    flags->at = false;
-}
 void recursive_flag(const char *path, s_flags_t *flags) {
     DIR *dir;
     struct dirent *entry;
@@ -95,89 +59,11 @@ void recursive_flag(const char *path, s_flags_t *flags) {
     closedir(dir);
 }
 
-void ls_l(const char *path) {
-    DIR *dir;
-    struct dirent *entry;
-    struct stat sb;
-    char file_path[1024];
-
-    if (!(dir = opendir(path))) {
-        perror("Cannot open directory");
-        return;
-    }
-
-    printf("total ");
-    
-    // Calculate total blocks
-    int total_blocks = 0;
-    while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_name[0] == '.') continue;
-
-        snprintf(file_path, sizeof(file_path), "%s/%s", path, entry->d_name);
-
-        if (lstat(file_path, &sb) == -1) {
-            perror("Cannot get file information");
-            continue;
-        }
-        total_blocks += (int)(sb.st_blocks / 2);
-    }
-    closedir(dir);
-    printf("%d\n", total_blocks);
-
-    // Reopen directory
-    if (!(dir = opendir(path))) {
-        perror("Cannot open directory");
-        return;
-    }
-
-    while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_name[0] == '.') continue;
-
-        snprintf(file_path, sizeof(file_path), "%s/%s", path, entry->d_name);
-
-        if (lstat(file_path, &sb) == -1) {
-            perror("Cannot get file information");
-            continue;
-        }
-
-        printf("%c%c%c%c%c%c%c%c%c%c ",
-            (S_ISDIR(sb.st_mode)) ? 'd' : '-',
-            (sb.st_mode & S_IRUSR) ? 'r' : '-',
-            (sb.st_mode & S_IWUSR) ? 'w' : '-',
-            (sb.st_mode & S_IXUSR) ? 'x' : '-',
-            (sb.st_mode & S_IRGRP) ? 'r' : '-',
-            (sb.st_mode & S_IWGRP) ? 'w' : '-',
-            (sb.st_mode & S_IXGRP) ? 'x' : '-',
-            (sb.st_mode & S_IROTH) ? 'r' : '-',
-            (sb.st_mode & S_IWOTH) ? 'w' : '-',
-            (sb.st_mode & S_IXOTH) ? 'x' : '-');
-
-        printf("%2d ", (int)sb.st_nlink);
-
-        struct passwd *pw = getpwuid(sb.st_uid);
-        struct group *gr = getgrgid(sb.st_gid);
-
-        printf("%s %s ", pw->pw_name, gr->gr_name);
-
-        printf("%7ld ", (long)sb.st_size);
-
-        struct tm *timeinfo;
-        timeinfo = localtime(&sb.st_mtime);
-        char buffer[80];
-        strftime(buffer, sizeof(buffer), "%b %d %H:%M", timeinfo);
-        printf("%s ", buffer);
-
-        printf("%s\n", entry->d_name);
-    }
-
-    closedir(dir);
-}
-
 
 int main(int argc, char *argv[]) {
     const char *dirname;
     s_flags_t flags;
-    initFalseFlags(&flags);
+    init_flags(&flags);
     // bool with_flags = false;
     // bool with_dir = false;
     if (argc >= 2 && argv[1][0] == '-') { 
@@ -203,8 +89,23 @@ int main(int argc, char *argv[]) {
     // else{
         if(flags.R)
             recursive_flag(dirname, &flags);
-        else if (flags.l)
-            ls_l(dirname);
+        else if (flags.l) {
+                int count;
+                FileEntry *file_entries = fill_file_entries(dirname, &count);
+                if (file_entries == NULL) {
+                    return 1;
+                }
+
+                // Сортируем массив по именам
+                custom_qsort(file_entries, count, sizeof(FileEntry), compare_file_entries);
+
+                // Выводим отсортированный массив
+                print_file_entries(file_entries, count);
+
+                // Освобождаем память для массива
+                free(file_entries);
+                // print_longlist(dirname, &flags);
+        }
         else if (flags.C)
             print_multicolumn(dirname, &flags);
         else if (flags.one) {
