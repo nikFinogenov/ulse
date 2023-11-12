@@ -99,84 +99,47 @@ void print_perline(const char *dirname, s_flags_t *flags) {
 }
 
 void print_longlist(const char *dirname, s_flags_t *flags) {
+    int count;
+    FileEntry *file_entries = fill_file_entries(dirname, &count, flags);
+    if (file_entries == NULL) {
+        return;
+    }
+
+    // Сортируем массив по именам
+    custom_qsort(file_entries, count, sizeof(FileEntry), compare_file_entries);
+
+    // Выводим отсортированный массив
+    // print_file_entries(file_entries, count);
+
+    // // Освобождаем память для массива
+    // free(file_entries);
     while (flags)
     {
         break;
     }
     
-    DIR *dir;
-    struct dirent *entry;
-    struct stat sb;
-    char file_path[1024];
-
-    if (!(dir = opendir(dirname))) {
-        perror("Cannot open directory");
-        return;
+        int max_ln_len = 0;
+    for (int i = 0; i < count; ++i) {
+        int x = file_entries[i].nlinks;
+        int len = 1;
+        while ((x /=10) > 0) len++;
+        if (len > max_ln_len) max_ln_len = len; 
     }
+    for (int i = 0; i < count; ++i) {
+        printf("%c%2s %*d %s  %s%7ld %s %s%s%s\n",
+               file_entries[i].type,
+               file_entries[i].permissions,
+               (file_entries[i].nlinks) ? max_ln_len : 2, // Используйте %*d для динамической ширины поля
+               file_entries[i].nlinks,
+               file_entries[i].owner,
+               file_entries[i].group,
+               file_entries[i].size, // Используйте явное приведение к long для %ld
+               file_entries[i].modification_time,
+               file_entries[i].name,
+               (file_entries[i].type == 'l' ? " -> " : ""),
+               (file_entries[i].type == 'l' ? file_entries[i].symlink : ""));
 
-    printf("total ");
-    
-    // Calculate total blocks
-    int total_blocks = 0;
-    while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_name[0] == '.') continue;
-
-        snprintf(file_path, sizeof(file_path), "%s/%s", dirname, entry->d_name);
-
-        if (lstat(file_path, &sb) == -1) {
-            perror("Cannot get file information");
-            continue;
-        }
-        total_blocks += (int)(sb.st_blocks / 2);
+        free(file_entries[i].name);  // Освобождаем память для каждого имени
     }
-    closedir(dir);
-    printf("%d\n", total_blocks);
-
-    // Reopen directory
-    if (!(dir = opendir(dirname))) {
-        perror("Cannot open directory");
-        return;
-    }
-
-    while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_name[0] == '.') continue;
-
-        snprintf(file_path, sizeof(file_path), "%s/%s", dirname, entry->d_name);
-
-        if (lstat(file_path, &sb) == -1) {
-            perror("Cannot get file information");
-            continue;
-        }
-
-        printf("%c%c%c%c%c%c%c%c%c%c ",
-            (S_ISDIR(sb.st_mode)) ? 'd' : '-',
-            (sb.st_mode & S_IRUSR) ? 'r' : '-',
-            (sb.st_mode & S_IWUSR) ? 'w' : '-',
-            (sb.st_mode & S_IXUSR) ? 'x' : '-',
-            (sb.st_mode & S_IRGRP) ? 'r' : '-',
-            (sb.st_mode & S_IWGRP) ? 'w' : '-',
-            (sb.st_mode & S_IXGRP) ? 'x' : '-',
-            (sb.st_mode & S_IROTH) ? 'r' : '-',
-            (sb.st_mode & S_IWOTH) ? 'w' : '-',
-            (sb.st_mode & S_IXOTH) ? 'x' : '-');
-
-        printf("%2d ", (int)sb.st_nlink);
-
-        struct passwd *pw = getpwuid(sb.st_uid);
-        struct group *gr = getgrgid(sb.st_gid);
-
-        printf("%s %s ", pw->pw_name, gr->gr_name);
-
-        printf("%7ld ", (long)sb.st_size);
-
-        struct tm *timeinfo;
-        timeinfo = localtime(&sb.st_mtime);
-        char buffer[80];
-        strftime(buffer, sizeof(buffer), "%b %d %H:%M", timeinfo);
-        printf("%s ", buffer);
-
-        printf("%s\n", entry->d_name);
-    }
-
-    closedir(dir);
+    free(file_entries);
 }

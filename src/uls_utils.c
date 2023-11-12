@@ -63,7 +63,7 @@ void free_file_entry(FileEntry *entry) {
     free(entry->name);
 }
 
-FileEntry *fill_file_entries(const char *dirname, int *count) {
+FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) {
     DIR *dir;
     struct dirent *entry;
     struct stat sb;
@@ -78,7 +78,7 @@ FileEntry *fill_file_entries(const char *dirname, int *count) {
     // Считаем количество файлов в директории
     *count = 0;
     while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_name[0] == '.') continue;
+        if (entry->d_name[0] == '.' && !flags->a) continue;
         snprintf(file_path, sizeof(file_path), "%s/%s", dirname, entry->d_name);
         if (lstat(file_path, &sb) == -1) {
             perror("Cannot get file information");
@@ -108,7 +108,7 @@ FileEntry *fill_file_entries(const char *dirname, int *count) {
 
     int index = 0;
     while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_name[0] == '.') continue;
+        if (entry->d_name[0] == '.' && !flags->a) continue;
 
         snprintf(file_path, sizeof(file_path), "%s/%s", dirname, entry->d_name);
 

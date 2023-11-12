@@ -88,7 +88,7 @@ int compare_names(const void *a, const void *b);
 void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*comparator)(const void *, const void *));
 void init_flags(s_flags_t *flags);
 void print_longlist(const char *dirname, s_flags_t *flags);
-FileEntry *fill_file_entries(const char *dirname, int *count);
+FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags);
 // void sort_file_entries(FileEntry *file_entries, int count);
 int compare_file_entries(const void *a, const void *b);
 void print_file_entries(FileEntry *file_entries, int count);
