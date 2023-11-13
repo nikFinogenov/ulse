@@ -45,18 +45,19 @@ void print_multicolumn(const char *dirname, s_flags_t *flags) {
         int rows = (num_files + num_columns - 1) / num_columns;
         for (int i = 0; i < rows; ++i) {
             index = i;
-            for (int j = 0; j < num_columns; ++j) {
-                if (index < num_files) {
-                    mx_printstr(files[index]);
-                    int tabs = (width - mx_strlen(files[index]) + tab - 1) / tab;
-                    for (int i = 0; i < tabs; i++) {
-                        if (tab == 1) 
-                            mx_printchar(' ');
-                        else
-                            mx_printchar('\t');
-                    }
-                }
+            for (int j = 0; j < num_columns; j++) {
+                mx_printstr(files[index]);
+                int name_len = mx_strlen(files[index]);
                 index = index + rows;
+                if (index >= num_files)
+                    break;
+                int tabs = (width - name_len + tab - 1) / tab;
+                for (int i = 0; i < tabs; i++) {
+                    if (tab == 1) 
+                        mx_printchar(' ');
+                    else
+                        mx_printchar('\t');
+                }                
             }
             mx_printchar('\n');
         }
@@ -98,25 +99,33 @@ void print_perline(const char *dirname, s_flags_t *flags) {
     closedir(dir);
 }
 
-void print_longlist(const char *dirname, s_flags_t *flags) {
-    int count;
-    FileEntry *file_entries = fill_file_entries(dirname, &count, flags);
-    if (file_entries == NULL) {
-        return;
-    }
-
-    // Сортируем массив по именам
-    custom_qsort(file_entries, count, sizeof(FileEntry), compare_file_entries);
-
+void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_flags_t *flags) {
     // Выводим отсортированный массив
     // print_file_entries(file_entries, count);
 
     // // Освобождаем память для массива
     // free(file_entries);
-    while (flags)
-    {
-        break;
+    // while (flags)
+    // {
+    //     break;
+    // }
+    int total_blocks = 0;
+    struct stat sb;
+    char file_path[1024];
+    mx_printstr("total ");
+    // Считаем количество файлов в директории
+    // while ((entry = readdir(dir)) != NULL) {
+    for (int i = 0; i < count; ++i) {
+        if (file_entries[i].name[0] == '.' && !flags->a) continue;
+        snprintf(file_path, sizeof(file_path), "%s/%s", dirname, file_entries[i].name);
+        if (lstat(file_path, &sb) == -1) {
+            perror("Cannot get file information");
+            continue;
+        }
+        total_blocks += (int)(sb.st_blocks);
     }
+    mx_printint(total_blocks);
+    mx_printchar('\n');
     
         int max_ln_len = 0;
     for (int i = 0; i < count; ++i) {
@@ -139,7 +148,7 @@ void print_longlist(const char *dirname, s_flags_t *flags) {
                (file_entries[i].type == 'l' ? " -> " : ""),
                (file_entries[i].type == 'l' ? file_entries[i].symlink : ""));
 
-        free(file_entries[i].name);  // Освобождаем память для каждого имени
+        // free(file_entries[i].name);  // Освобождаем память для каждого имени
     }
-    free(file_entries);
+    // free(file_entries);
 }

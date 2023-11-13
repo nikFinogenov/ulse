@@ -68,27 +68,18 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
     struct dirent *entry;
     struct stat sb;
     char file_path[1024];
-    int total_blocks = 0;
 
     if (!(dir = opendir(dirname))) {
         perror("Cannot open directory");
         return NULL;
     }
-    printf("total ");
     // Считаем количество файлов в директории
     *count = 0;
     while ((entry = readdir(dir)) != NULL) {
         if (entry->d_name[0] == '.' && !flags->a) continue;
-        snprintf(file_path, sizeof(file_path), "%s/%s", dirname, entry->d_name);
-        if (lstat(file_path, &sb) == -1) {
-            perror("Cannot get file information");
-            continue;
-        }
-        total_blocks += (int)(sb.st_blocks);
         (*count)++;
     }
     closedir(dir);
-    printf("%d\n", total_blocks);
         
 
     // Выделяем память под массив FileEntry
@@ -144,7 +135,7 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
                  (sb.st_mode & S_IROTH) ? 'r' : '-',
                  (sb.st_mode & S_IWOTH) ? 'w' : '-',
                  (sb.st_mode & S_IXOTH) ? 'x' : '-',
-                 (char)((listxattr(file_path, NULL, 0, XATTR_NOFOLLOW) > 0) ? '@' : ' '), // Проверка на наличие extended attributes
+                 (char)((listxattr(file_path, NULL, 0, XATTR_NOFOLLOW) > 0) ? '@' : (acl_get_file(file_path, ACL_TYPE_EXTENDED)) ? '+' : ' '), // Проверка на наличие extended attributes
                 (S_ISLNK(sb.st_mode) && readlink(file_path, file_entry->symlink, sizeof(file_entry->symlink)) != -1) ? " -> " : "");
 
         file_entry->nlinks = (int)sb.st_nlink;
