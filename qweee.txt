@@ -1,3 +1,0 @@
-Makefile	obj		qweee.txt	tests.sh
-inc		qwe.txt		src		uls
-libmx		qwee.txt	temp
