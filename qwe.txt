@@ -1,0 +1,8 @@
+total 0
+-rw-r--r--  1 nikfin  staff    0 Nov 11 09:04 f1
+lrwxr-xr-x  1 nikfin  staff    2 Nov 14 18:40 f1_slink -> f1
+-rw-r--r--  1 nikfin  staff    0 Nov 11 09:04 f2
+-rw-r--r--  1 nikfin  staff    0 Nov 11 09:04 f3
+drwxr-xr-x  4 nikfin  staff  128 Nov 11 09:04 fol1
+
+temp/fol1:

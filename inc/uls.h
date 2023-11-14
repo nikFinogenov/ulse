@@ -19,13 +19,6 @@
 
 #define MAX_FLAGS 34
 
-typedef struct uls_stat_s {
-    unsigned long size;
-    unsigned long n_blks;
-    unsigned long blocks[32];
-} uls_stat_t;
-
-
 typedef struct s_flags_n{
     bool a; //DONE Flag for option 'a': Usually stands for "all", showing hidden files.       
     bool A; // Flag for option 'A': Lists all entries except for '.' and '..'.
@@ -71,14 +64,22 @@ typedef struct {
 typedef struct {
     char *name;
     char type;
-    char permissions[11];
+    char *permissions;
     int nlinks;
-    char owner[256];
-    char group[256];
+    char *owner;
+    char *group;
     long size;
-    char modification_time[20];
+    char *modification_time;
     char symlink[1024];
 } FileEntry;
+
+typedef struct {
+    int max_nlinks_len;
+    int max_username_len;
+    int max_groupname_len;
+    int max_size_len;
+} t_max_sizes_s;
+
 
 
 int parse_args(int argc, char *argv[], s_flags_t *flags);
