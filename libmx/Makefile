@@ -47,3 +47,9 @@ uninstall: clean
 	@printf "$(NAME)\t   ${REDB}uninstalled${NORMAL}\n"
 
 reinstall: uninstall install
+
+start: 
+	$(COMP) $(CFLG) main.c libmx.a && ./a.out
+
+start_i: install
+	$(COMP) $(CFLG) main.c libmx.a && ./a.out

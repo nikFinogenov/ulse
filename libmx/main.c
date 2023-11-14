@@ -1,5 +1,9 @@
 #include "inc/libmx.h"
 
-int main (int argc, char *argv[]) {
-
+int main (void) {
+    // long n = ;
+    int n = 12;
+    mx_printint(mx_intlen(n));
+    mx_printchar('\n');
+    return 0;
 }

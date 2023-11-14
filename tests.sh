@@ -136,15 +136,15 @@ else
     echo "$diff_res"
 fi
 
-# ./uls -Rl > $uls_output
-# ls -Rl > $ls_output
-# diff_res=$(diff $uls_output $ls_output)
-# if [ $? -eq 0 ]; then
-#     echo "\"uls -Rl\" OK "
-# else
-#     echo "\"uls -Rl\" FALSE"
-#     echo "$diff_res"
-# fi
+./uls -Rl > $uls_output
+ls -Rl > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -Rl\" OK "
+else
+    echo "\"uls -Rl\" FALSE"
+    echo "$diff_res"
+fi
 
 # ./uls -RaC > $uls_output
 # ls -RaC > $ls_output

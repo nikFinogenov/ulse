@@ -1,4 +1,5 @@
 #include "uls.h"
+#include "stdlib.h"
 
 void print_multicolumn(const char *dirname, s_flags_t *flags) {
     struct dirent *dir_entry;
@@ -99,6 +100,73 @@ void print_perline(const char *dirname, s_flags_t *flags) {
     closedir(dir);
 }
 
+void mx_printint_formatted(int n, int width) {
+    int num_width = 0;
+    int temp = n;
+
+    // Вычисляем ширину числа
+    while (temp != 0) {
+        temp /= 10;
+        num_width++;
+    }
+
+    // Печатаем пробелы перед числом
+    for (int i = 0; i < width - num_width; i++) {
+        mx_printchar(' ');
+    }
+
+    // Печатаем само число
+    mx_printint(n);
+}
+
+void mx_printstr_formatted(char *str, int wid, bool align) {
+    int spaces = wid - mx_strlen(str);
+
+    if (!align) {
+        mx_printstr(str);
+    }
+
+    for (int i = 0; i < spaces; i++) {
+        mx_printchar(' ');
+    }
+
+    if (align) {
+        mx_printstr(str);
+    }
+}
+
+void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize) {
+    mx_printchar(file_entries[i].type);
+    mx_printstr(file_entries[i].permissions);
+    mx_printstr(" ");
+    
+    if (file_entries[i].nlinks) {
+        mx_printint_formatted(file_entries[i].nlinks, mxsize.max_nlinks_len);
+    } else {
+        mx_printstr("  ");
+    }
+
+    mx_printstr(" ");
+    mx_printstr_formatted(file_entries[i].owner, mxsize.max_username_len, true);
+    mx_printstr("  ");
+    mx_printstr_formatted(file_entries[i].group, mxsize.max_groupname_len, true);
+    (file_entries[i].size == 0) ? mx_printstr(" ") : mx_printstr("  ");
+    
+    mx_printint_formatted(file_entries[i].size, mxsize.max_size_len);
+
+    mx_printstr(" ");
+    mx_printstr(file_entries[i].modification_time);
+    mx_printstr(" ");
+    mx_printstr(file_entries[i].name);
+
+    if (file_entries[i].type == 'l') {
+        mx_printstr(" -> ");
+        mx_printstr(file_entries[i].symlink);
+    }
+
+    mx_printstr("\n");
+}
+
 void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_flags_t *flags) {
     // Выводим отсортированный массив
     // print_file_entries(file_entries, count);
@@ -134,19 +202,40 @@ void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_f
         while ((x /=10) > 0) len++;
         if (len > max_ln_len) max_ln_len = len; 
     }
+    // char *output;
+    t_max_sizes_s t_mxsize = {.max_groupname_len = 0, .max_nlinks_len = 0, .max_size_len = 0, .max_username_len = 0};
+    for (int i = 0; i < count; ++i) { 
+            int group_len = mx_strlen(file_entries[i].group);
+            int nlinks_len = mx_intlen(file_entries[i].nlinks);
+            int size_len = mx_intlen(file_entries[i].size);
+            int name_len = mx_strlen(file_entries[i].group);
+            if (group_len > t_mxsize.max_groupname_len) {
+                t_mxsize.max_groupname_len = group_len;
+            }
+            if (nlinks_len > t_mxsize.max_nlinks_len) {
+                t_mxsize.max_nlinks_len = nlinks_len;
+            }
+            if (size_len > t_mxsize.max_size_len) {
+                t_mxsize.max_size_len = size_len;
+            }
+            if (name_len > t_mxsize.max_username_len) {
+                t_mxsize.max_username_len = name_len;
+            }
+    }
     for (int i = 0; i < count; ++i) {
-        printf("%c%2s %*d %s  %s%7ld %s %s%s%s\n",
-               file_entries[i].type,
-               file_entries[i].permissions,
-               (file_entries[i].nlinks) ? max_ln_len : 2, // Используйте %*d для динамической ширины поля
-               file_entries[i].nlinks,
-               file_entries[i].owner,
-               file_entries[i].group,
-               file_entries[i].size, // Используйте явное приведение к long для %ld
-               file_entries[i].modification_time,
-               file_entries[i].name,
-               (file_entries[i].type == 'l' ? " -> " : ""),
-               (file_entries[i].type == 'l' ? file_entries[i].symlink : ""));
+        print_file_entry(file_entries, i, t_mxsize);
+        // printf("%c%2s %*d %s  %s%7ld %s %s%s%s\n",
+        //        file_entries[i].type,
+        //        file_entries[i].permissions,
+        //        (file_entries[i].nlinks) ? max_ln_len : 2, // Используйте %*d для динамической ширины поля
+        //        file_entries[i].nlinks,
+        //        file_entries[i].owner,
+        //        file_entries[i].group,
+        //        file_entries[i].size, // Используйте явное приведение к long для %ld
+        //        file_entries[i].modification_time,
+        //        file_entries[i].name,
+        //        (file_entries[i].type == 'l' ? " -> " : ""),
+        //        (file_entries[i].type == 'l' ? file_entries[i].symlink : ""));
 
         // free(file_entries[i].name);  // Освобождаем память для каждого имени
     }
