@@ -64,12 +64,12 @@ typedef struct {
 typedef struct {
     char *name;
     char type;
-    char *permissions;
+    char permissions[11];
     int nlinks;
-    char *owner;
-    char *group;
+    char owner[256];
+    char group[256];
     long size;
-    char *modification_time;
+    char modification_time[20];
     char symlink[1024];
 } FileEntry;
 

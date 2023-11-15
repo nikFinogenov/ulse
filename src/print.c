@@ -137,7 +137,10 @@ void mx_printstr_formatted(char *str, int wid, bool align) {
 
 void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize) {
     mx_printchar(file_entries[i].type);
-    mx_printstr(file_entries[i].permissions);
+    for(int j = 0; j < mx_strlen(file_entries[i].permissions); j++) {
+        mx_printchar(file_entries[i].permissions[j]);
+    }
+    // mx_printstr(file_entries[i].permissions);
     mx_printstr(" ");
     
     if (file_entries[i].nlinks) {
@@ -147,13 +150,17 @@ void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize
     }
 
     mx_printstr(" ");
-    mx_printstr_formatted(file_entries[i].owner, mxsize.max_username_len, true);
+    char *str_temp = mx_char_to_str(file_entries[i].owner);
+    // mx_strcpy(str_temp, file_entries[i].owner);
+    mx_printstr_formatted(str_temp, mxsize.max_username_len, true);
+    free(str_temp);
     mx_printstr("  ");
-    mx_printstr_formatted(file_entries[i].group, mxsize.max_groupname_len, true);
+    str_temp = mx_char_to_str(file_entries[i].group);
+    // mx_strcpy(str_temp, file_entries[i].group);
+    mx_printstr_formatted(str_temp, mxsize.max_groupname_len, true);
+    free(str_temp);
     (file_entries[i].size == 0) ? mx_printstr(" ") : mx_printstr("  ");
-    
     mx_printint_formatted(file_entries[i].size, mxsize.max_size_len);
-
     mx_printstr(" ");
     mx_printstr(file_entries[i].modification_time);
     mx_printstr(" ");
