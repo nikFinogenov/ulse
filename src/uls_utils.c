@@ -127,25 +127,35 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
         else if (S_ISBLK(sb.st_mode)) file_entry->type = 'b';
         else file_entry->type = '-';
 
-        file_entry->permissions = mx_strjoin(file_entry->permissions, (sb.st_mode & S_IRUSR) ? "r" : "-");
-        file_entry->permissions = mx_strjoin(file_entry->permissions, (sb.st_mode & S_IWUSR) ? "w" : "-");
-        file_entry->permissions = mx_strjoin(file_entry->permissions, (sb.st_mode & S_IXUSR) ? "x" : "-");
-        file_entry->permissions = mx_strjoin(file_entry->permissions, (sb.st_mode & S_IRGRP) ? "r" : "-");
-        file_entry->permissions = mx_strjoin(file_entry->permissions, (sb.st_mode & S_IWGRP) ? "w" : "-");
-        file_entry->permissions = mx_strjoin(file_entry->permissions, (sb.st_mode & S_IXGRP) ? "x" : "-");
-        file_entry->permissions = mx_strjoin(file_entry->permissions, (sb.st_mode & S_IROTH) ? "r" : "-");
-        file_entry->permissions = mx_strjoin(file_entry->permissions, (sb.st_mode & S_IWOTH) ? "w" : "-");
-        file_entry->permissions = mx_strjoin(file_entry->permissions, (sb.st_mode & S_IXOTH) ? "x" : "-");
-        file_entry->permissions = mx_strjoin(file_entry->permissions, (listxattr(file_path, NULL, 0, 0x0001) > 0) ? "@" : (acl_get_file(file_path, ACL_TYPE_EXTENDED)) ? "+" : " ");
+        char *new_permissions = NULL;
+        new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IRUSR) ? "r" : "-");
+        new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IWUSR) ? "w" : "-");
+        new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IXUSR) ? "x" : "-");
+        new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IRGRP) ? "r" : "-");
+        new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IWGRP) ? "w" : "-");
+        new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IXGRP) ? "x" : "-");
+        new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IROTH) ? "r" : "-");
+        new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IWOTH) ? "w" : "-");
+        new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IXOTH) ? "x" : "-");
+        new_permissions = mx_strjoin(new_permissions, (listxattr(file_path, NULL, 0, 0x0001) > 0) ? "@" : (acl_get_file(file_path, ACL_TYPE_EXTENDED)) ? "+" : " ");
         // file_entry->permissions = mx_strjoin(file_entry->permissions, (S_ISLNK(sb.st_mode) && readlink(file_path, file_entry->symlink, sizeof(file_entry->symlink)) != -1) ? "" : "");
         if (S_ISLNK(sb.st_mode)) readlink(file_path, file_entry->symlink, sizeof(file_entry->symlink));
-
+        if ((unsigned long)mx_strlen(new_permissions) < sizeof(file_entry->permissions)) {
+        mx_strcpy(file_entry->permissions, new_permissions);
+        } else {
+            perror("Bad permisions");
+            exit(1);
+        }
+        free(new_permissions);
         file_entry->nlinks = (int)sb.st_nlink;
 
         struct passwd *pw = getpwuid(sb.st_uid);
         struct group *gr = getgrgid(sb.st_gid);
-        file_entry->owner = pw->pw_name;
-        file_entry->group = gr->gr_name;
+        // mx_strcpy(str_temp, );
+        mx_strcpy(file_entry->owner, pw->pw_name);
+        mx_strcpy(file_entry->group, gr->gr_name);
+        // file_entry->owner = pw->pw_name;
+        // file_entry->group = gr->gr_name;
         file_entry->size = sb.st_size;
 
 
@@ -155,39 +165,45 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
     time_t now = time(NULL);
     time_t six_months_sec = (365 / 2) * 24 * 60 * 60;
     arr[4][4] = '\0';
-    
+    char *new_modification_time = NULL;
     if (timesp.tv_sec + six_months_sec <= now
         || timesp.tv_sec >= now + six_months_sec) {
-        file_entry->modification_time = mx_strjoin(file_entry->modification_time, arr[1]);
-        file_entry->modification_time = mx_strjoin(file_entry->modification_time, " ");
+        new_modification_time = mx_strjoin(new_modification_time, arr[1]);
+        new_modification_time = mx_strjoin(new_modification_time, " ");
         int spaces = 2 - mx_strlen(arr[2]);
         for (int i = 0; i < spaces; i++) {
-            file_entry->modification_time = mx_strjoin(file_entry->modification_time, " ");
+            new_modification_time = mx_strjoin(new_modification_time, " ");
         }
-        file_entry->modification_time = mx_strjoin(file_entry->modification_time, arr[2]);
-        file_entry->modification_time = mx_strjoin(file_entry->modification_time, "  ");
-        file_entry->modification_time = mx_strjoin(file_entry->modification_time, arr[4]);
+        new_modification_time = mx_strjoin(new_modification_time, arr[2]);
+        new_modification_time = mx_strjoin(new_modification_time, "  ");
+        new_modification_time = mx_strjoin(new_modification_time, arr[4]);
     }
     else {
-        file_entry->modification_time = mx_strjoin(file_entry->modification_time, arr[1]);
-        file_entry->modification_time = mx_strjoin(file_entry->modification_time, " ");
+        new_modification_time = mx_strjoin(new_modification_time, arr[1]);
+        new_modification_time = mx_strjoin(new_modification_time, " ");
 
         int spaces = 2 - mx_strlen(arr[2]);
         for (int i = 0; i < spaces; i++) {
-            file_entry->modification_time = mx_strjoin(file_entry->modification_time, " ");
+            new_modification_time = mx_strjoin(new_modification_time, " ");
         }
-        file_entry->modification_time = mx_strjoin(file_entry->modification_time, arr[2]);
+        new_modification_time = mx_strjoin(new_modification_time, arr[2]);
 
-        file_entry->modification_time = mx_strjoin(file_entry->modification_time, " ");
+        new_modification_time = mx_strjoin(new_modification_time, " ");
         char **arr_time = mx_strsplit(arr[3], ':');
-        file_entry->modification_time = mx_strjoin(file_entry->modification_time, arr_time[0]);
-        file_entry->modification_time = mx_strjoin(file_entry->modification_time, ":");
-        file_entry->modification_time = mx_strjoin(file_entry->modification_time, arr_time[1]);
+        new_modification_time = mx_strjoin(new_modification_time, arr_time[0]);
+        new_modification_time = mx_strjoin(new_modification_time, ":");
+        new_modification_time = mx_strjoin(new_modification_time, arr_time[1]);
         mx_del_strarr(&arr_time);
     }
 
     mx_del_strarr(&arr);
-
+    if (strlen(new_modification_time) < sizeof(file_entry->modification_time)) {
+    strcpy(file_entry->modification_time, new_modification_time);
+    } else {
+        perror("Bad time");
+        exit(1);
+    }
+    free(new_modification_time);
 
         if (S_ISLNK(sb.st_mode)) {
             ssize_t len = readlink(file_path, file_entry->symlink, sizeof(file_entry->symlink) - 1);

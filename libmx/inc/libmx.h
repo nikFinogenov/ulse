@@ -24,6 +24,7 @@ typedef struct s_list {
 } t_list;
 
 int mx_intlen(int n);
+char* mx_char_to_str(const char source[]);
 int mx_get_index(char **strarr, char *str);
 long long mx_atoll(const char *str);
 bool mx_isalpha(int c);
