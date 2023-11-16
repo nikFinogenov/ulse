@@ -120,7 +120,7 @@ void print_perline(const char *dirname, s_flags_t *flags) {
     closedir(dir);
 }
 
-void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize) {
+void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize, s_flags_t *flags) {
     mx_printchar(file_entries[i].type);
     for(int j = 0; j < mx_strlen(file_entries[i].permissions); j++) {
         mx_printchar(file_entries[i].permissions[j]);
@@ -133,10 +133,16 @@ void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize
         mx_printstr("  ");
     }
 
-    mx_printchar(' ');
-    printstr_formatted(mx_char_to_str(file_entries[i].owner), mxsize.max_username_len, true);
-    mx_printstr("  ");
-    printstr_formatted(mx_char_to_str(file_entries[i].group), mxsize.max_groupname_len, true);
+    if(!flags->g){
+            mx_printchar(' ');
+            printstr_formatted(mx_char_to_str(file_entries[i].owner), mxsize.max_username_len, true);
+    }
+    else mx_printchar(' ');
+    if (!flags->g && !flags->o) mx_printstr("  ");
+    if(!flags->o){
+        printstr_formatted(mx_char_to_str(file_entries[i].group), mxsize.max_groupname_len, true);
+    }
+        
     (file_entries[i].size == 0) ? mx_printstr(" ") : mx_printstr("  ");
     printint_formatted(file_entries[i].size, mxsize.max_size_len);
     mx_printchar(' ');
@@ -200,7 +206,7 @@ void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_f
             }
     }
     for (int i = 0; i < count; ++i) {
-        print_file_entry(file_entries, i, t_mxsize);
+        print_file_entry(file_entries, i, t_mxsize, flags);
     }
 }
 
