@@ -22,7 +22,7 @@
 typedef struct s_flags_n{
     bool one; //DONE Flag for option '1': List one entry per line.
     bool C; //DONE Flag for option 'C': Force multi-column output.
-    bool m;
+    bool m; //comma separated output
     bool l; // Flag for option 'l': Long format, showing detailed file information.
     bool c; // Flag for option 'c': Sort by change time, showing the newest first.
     bool u; // Flag for option 'u': Sort by access time, showing the newest first.
@@ -99,5 +99,6 @@ void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_f
 FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags);
 FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags);
 int compare_file_entries(const void *a, const void *b);
+void print_coma(const char *dirname, s_flags_t *flags);
 
 #endif
