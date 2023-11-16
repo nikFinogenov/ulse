@@ -5,9 +5,26 @@ home_dir=$HOME
 uls_output="$home_dir/uls_output.txt"
 ls_output="$home_dir/ls_output.txt"
 
+mkdir temp_folder_for_test
+mkdir temp_folder_for_test2
+cd temp_folder_for_test
+
+touch file1
+touch file2
+touch file3
+ln -s file1 ln_file1
+cd ..
+ln -s temp ln_temp_file1
+
+cd temp_folder_for_test2
+touch file1
+touch file2
+touch file3
+cd ..
+
+
 ./uls > $uls_output
 ls > $ls_output
-
 diff_res=$(diff $uls_output $ls_output)
 if [ $? -eq 0 ]; then
     echo "\"uls\" OK "
@@ -146,16 +163,60 @@ else
     echo "$diff_res"
 fi
 
-# ./uls -RaC > $uls_output
-# ls -RaC > $ls_output
-# diff_res=$(diff $uls_output $ls_output)
-# if [ $? -eq 0 ]; then
-#     echo "\"uls -RaC\" OK "
-# else
-#     echo "\"uls -RaC\" FALSE"
-#     echo "$diff_res"
-# fi
+./uls -RaC > $uls_output
+ls -RaC > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -RaC\" OK "
+else
+    echo "\"uls -RaC\" FALSE"
+    echo "$diff_res"
+fi
+
+./uls -l ln_temp_file1 > $uls_output
+ls -l ln_temp_file1 > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -l ln_temp_file1\" OK "
+else
+    echo "\"uls -l ln_temp_file1\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -l ln_temp_file1/ > $uls_output
+ls -l ln_temp_file1/ > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -l ln_temp_file1/\" OK "
+else
+    echo "\"uls -l ln_temp_file1/\" FALSE"
+    echo "$diff_res"
+fi
+
+./uls temp_folder_for_test temp_folder_for_test2 > $uls_output
+ls temp_folder_for_test temp_folder_for_test2 > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -l temp_folder_for_test temp_folder_for_test2\" OK "
+else
+    echo "\"uls -l temp_folder_for_test temp_folder_for_test2\" FALSE"
+    echo "$diff_res"
+fi
+
+./uls temp_folder_for_test temp_folder_for_test2 > $uls_output
+ls temp_folder_for_test temp_folder_for_test2 > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls temp_folder_for_test temp_folder_for_test2\" OK "
+else
+    echo "\"uls temp_folder_for_test temp_folder_for_test2\" FALSE"
+    echo "$diff_res"
+fi
+
 
 # Очистить временные файлы
 rm $uls_output
 rm $ls_output
+rm -r temp_folder_for_test
+rm -r temp_folder_for_test2
+rm ln_temp_file1
