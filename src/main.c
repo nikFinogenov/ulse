@@ -5,6 +5,7 @@ void recursive_flag(const char *path, FileEntry *file_entries, int count, s_flag
 
     if (flags->l)
         print_longlist(path, file_entries, count, flags);
+    else if(flags->m) print_coma(path, flags);
     else if(flags->C)
         print_multicolumn(path, flags);
     else if (flags->one)
@@ -92,6 +93,7 @@ int main(int argc, char *argv[]) {
             else if (flags.l) {
                 print_longlist(dirname, file_entries, count_files, &flags);
             }
+            else if(flags.m) print_coma(dirname, &flags);
             else if (flags.C)
                 print_multicolumn(dirname, &flags);
             else if (flags.one) {

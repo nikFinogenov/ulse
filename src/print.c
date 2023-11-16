@@ -204,4 +204,46 @@ void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_f
     }
 }
 
+void print_coma(const char *dirname, s_flags_t *flags) {
+    struct dirent *dir_entry;
+    char **files = NULL;
+    int num_files = 0;
+
+    DIR *dir = opendir(dirname);
+    if (dir == NULL) {
+        mx_printerr("opendir");
+        exit(1);
+    }
+    int terminal_width = 80;
+    if (isatty(1)) {
+        struct winsize w;
+        ioctl(0, TIOCGWINSZ, &w);
+        terminal_width = w.ws_col;
+    }
+    int total_width = 0;
+    while ((dir_entry = readdir(dir)) != NULL) {
+        if (dir_entry->d_name[0] == '.' && !flags->a)
+            continue;
+        files = mx_realloc(files, (num_files + 1) * sizeof(char *));
+        files[num_files] = mx_strdup(dir_entry->d_name);
+        num_files++;
+    }
+    if (num_files > 0)
+        if(!flags->f) custom_qsort(files, num_files, sizeof(char *), compare_names);
+    for(int i = 0; i < num_files; i++) {
+        if((total_width + mx_strlen(files[i]) + 2) >= terminal_width) {
+            mx_printchar('\n');
+            total_width = 0;
+        }
+        mx_printstr(files[i]);
+        if(i + 1 != num_files) mx_printstr(", ");
+        total_width = total_width + mx_strlen(files[i]) + 2;
+    }
+    mx_printchar('\n');
+    for (int i = 0; i < num_files; ++i) {
+        free(files[i]);
+    }
+    free(files);
+    closedir(dir);
+}
 
