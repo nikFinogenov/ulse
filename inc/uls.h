@@ -22,7 +22,7 @@
 typedef struct s_flags_n{
     bool one; //DONE Flag for option '1': List one entry per line.
     bool C; //DONE Flag for option 'C': Force multi-column output.
-    bool m; //comma separated output
+    bool m; //DONE comma separated output
     bool l; // Flag for option 'l': Long format, showing detailed file information.
     bool c; // Flag for option 'c': Sort by change time, showing the newest first.
     bool u; // Flag for option 'u': Sort by access time, showing the newest first.
@@ -41,8 +41,8 @@ typedef struct s_flags_n{
     bool e; // Flag for option 'e': Display the escape sequences for control characters.
     bool T; // Flag for option 'T': Display full time information.
     bool at; //Flag for option '@': Extended attribute keys.
-    bool g; // Flag for option 'g': Like 'l', but excludes the owner.
-    bool o; // Flag for option 'o': Like 'l', but excludes the group.
+    bool g; //DONE Flag for option 'g': Like 'l', but excludes the owner.
+    bool o; //DONE Flag for option 'o': Like 'l', but excludes the group.
     bool x; // Flag for option 'x': List entries by lines, rather than columns.
     bool n; // Flag for option 'n': List numeric user and group IDs instead of names.
     bool q;
