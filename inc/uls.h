@@ -20,40 +20,46 @@
 #define MAX_FLAGS 34
 
 typedef struct s_flags_n{
-    bool a; //DONE Flag for option 'a': Usually stands for "all", showing hidden files.       
-    bool A; // Flag for option 'A': Lists all entries except for '.' and '..'.
+    bool one; //DONE Flag for option '1': List one entry per line.
+    bool C; //DONE Flag for option 'C': Force multi-column output.
+    bool m;
     bool l; // Flag for option 'l': Long format, showing detailed file information.
-    bool r; // Flag for option 'r': Reverse the order of listing.
-    bool R; //DONE Flag for option 'R': Recursively list subdirectories.
-    bool t; // Flag for option 't': Sort by modification time, showing the newest first.
-    bool u; // Flag for option 'u': Sort by access time, showing the newest first.
     bool c; // Flag for option 'c': Sort by change time, showing the newest first.
+    bool u; // Flag for option 'u': Sort by access time, showing the newest first.
+    bool U;
+    bool t; // Flag for option 't': Sort by modification time, showing the newest first.
+    bool S; // Flag for option 'S': Sort by file size, showing the largest first.
+    bool f; // Flag for option 'f': Disable sorting, and list entries in the order they appear.
+    bool A; // Flag for option 'A': Lists all entries except for '.' and '..'.
+    bool a; //DONE Flag for option 'a': Usually stands for "all", showing hidden files.       
+    bool R; //DONE Flag for option 'R': Recursively list subdirectories.
     bool G; // Flag for option 'G': Enable colored output.
+    bool F; // Flag for option 'F': Append a character to entries to indicate their type.
+    bool p; // Flag for option 'p': Add a trailing '/' to directory names.
+    bool r; // Flag for option 'r': Reverse the order of listing.
     bool h; // Flag for option 'h': Human-readable file sizes (e.g., in KB, MB).
     bool e; // Flag for option 'e': Display the escape sequences for control characters.
-    bool i; // Flag for option 'i': Show the file's inode number.
-    bool S; // Flag for option 'S': Sort by file size, showing the largest first.
     bool T; // Flag for option 'T': Display full time information.
-    bool x; // Flag for option 'x': List entries by lines, rather than columns.
-    bool p; // Flag for option 'p': Add a trailing '/' to directory names.
-    bool d; // Flag for option 'd': List the directory itself, rather than its contents.
-    bool f; // Flag for option 'f': Disable sorting, and list entries in the order they appear.
-    bool n; // Flag for option 'n': List numeric user and group IDs instead of names.
+    bool at; //Flag for option '@': Extended attribute keys.
     bool g; // Flag for option 'g': Like 'l', but excludes the owner.
     bool o; // Flag for option 'o': Like 'l', but excludes the group.
-    bool L; //SKIP Flag for option 'L': Follow symbolic links when listing.
-    bool F; // Flag for option 'F': Append a character to entries to indicate their type.
-    bool one; //DONE Flag for option '1': List one entry per line.
-    bool at; //Flag for option '@': Extended attribute keys.
-    bool C; //DONE Flag for option 'C': Force multi-column output.
-    bool B; //SKIP Flag for option 'B': Disable line wrapping, useful for long filenames.
-    bool s; // Flag for option 's': Show the size of each file in blocks.
-    bool X; //SKIP Flag for option 'X': Sort alphabetically by entry extension.
-    bool v; //SKIP Flag for option 'v': Show version information.
-    bool w; //SKIP Flag for option 'w': List in wide format, with more details.
-    bool D; //SKIP Flag for option 'D': Show the time in the format specified by the environment variable.
-    bool P; //SKIP Flag for option 'P': Show permissions of the listed files.
-    bool Q; //SKIP Flag for option 'Q': Quote file names, useful for special characters in names.
+    bool x; // Flag for option 'x': List entries by lines, rather than columns.
+    bool n; // Flag for option 'n': List numeric user and group IDs instead of names.
+    bool q;
+    bool H;
+
+
+    // bool i; // Flag for option 'i': Show the file's inode number.
+    // bool d; // Flag for option 'd': List the directory itself, rather than its contents.
+    // bool L; //SKIP Flag for option 'L': Follow symbolic links when listing.
+    // bool B; //SKIP Flag for option 'B': Disable line wrapping, useful for long filenames.
+    // bool s; // Flag for option 's': Show the size of each file in blocks.
+    // bool X; //SKIP Flag for option 'X': Sort alphabetically by entry extension.
+    // bool v; //SKIP Flag for option 'v': Show version information.
+    // bool w; //SKIP Flag for option 'w': List in wide format, with more details.
+    // bool D; //SKIP Flag for option 'D': Show the time in the format specified by the environment variable.
+    // bool P; //SKIP Flag for option 'P': Show permissions of the listed files.
+    // bool Q; //SKIP Flag for option 'Q': Quote file names, useful for special characters in names.
 } s_flags_t;
 
 typedef struct {
@@ -83,6 +89,7 @@ typedef struct {
 
 
 int parse_args(int argc, char *argv[], s_flags_t *flags);
+int parse_dirs(int argc, char *argv[], char ***dirs);
 void print_multicolumn(const char *dirname, s_flags_t *flags);
 void print_perline(const char *dirname, s_flags_t *flags);
 int compare_names(const void *a, const void *b);
@@ -90,6 +97,7 @@ void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*co
 void init_flags(s_flags_t *flags);
 void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_flags_t *flags);
 FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags);
+FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags);
 int compare_file_entries(const void *a, const void *b);
 
 #endif

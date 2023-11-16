@@ -2,6 +2,7 @@
 
 int parse_args(int argc, char *argv[], s_flags_t *flags) {
     int i, count = 0;
+
     for (i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
             for (int j = 1; argv[i][j]; j++) {
@@ -41,9 +42,6 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                     case 'e':
                         flags->e = true;
                         break;
-                    case 'i':
-                        flags->i = true;
-                        break;
                     case 'S':
                         flags->S = true;
                         break;
@@ -56,9 +54,6 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                     case 'p':
                         flags->p = true;
                         break;
-                    case 'd':
-                        flags->d = true;
-                        break;
                     case 'f':
                         flags->f = true;
                         break;
@@ -70,9 +65,6 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                         break;
                     case 'o':
                         flags->o = true;
-                        break;
-                    case 'L':
-                        flags->L = true;
                         break;
                     case 'F':
                         flags->F = true;
@@ -90,29 +82,17 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                         flags->one = false;
                         flags->l = false;
                         break;
-                    case 'B':
-                        flags->B = true;
+                    case 'm':
+                        flags->m = true;
                         break;
-                    case 's':
-                        flags->s = true;
+                    case 'U':
+                        flags->U = true;
                         break;
-                    case 'X':
-                        flags->X = true;
+                    case 'q':
+                        flags->q = true;
                         break;
-                    case 'v':
-                        flags->v = true;
-                        break;
-                    case 'w':
-                        flags->w = true;
-                        break;
-                    case 'D':
-                        flags->D = true;
-                        break;
-                    case 'P':
-                        flags->P = true;
-                        break;
-                    case 'Q':
-                        flags->Q = true;
+                    case 'H':
+                        flags->H = true;
                         break;
                     default:
                         fprintf(stderr, "Unrecognized flag: -%c\n", argv[i][j]);
@@ -123,4 +103,18 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
         }
     }
     return count;
+}
+
+int parse_dirs(int argc, char *argv[], char ***dirs) {
+    int i, dir_count = 0;
+
+    *dirs = malloc((argc - 1) * sizeof(char *)); // выделяем память для массива указателей
+
+    for (i = 1; i < argc; i++) {
+        if (argv[i][0] != '-') {
+            (*dirs)[dir_count] = strdup(argv[i]); // используем strdup для копирования строки
+            dir_count++;
+        }
+    }
+    return dir_count;
 }
