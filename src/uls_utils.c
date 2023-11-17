@@ -153,6 +153,29 @@ FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags) {
     return file_entry;
 }
 
+char *format_size(long size) {
+    char *suffix[] = {"B", "K", "M", "G", "T"};
+    int i;
+    double d_size = (double)size;
+
+    for (i = 0; i < 6; i++) {
+        if (d_size < 1024) {
+            break;
+        }
+        d_size /= 1024;
+    }
+
+    char *result = (char *)malloc(20); // Можно выбрать размер в зависимости от вашего ожидаемого максимального размера
+    if (result == NULL) {
+        perror("malloc");
+        exit(EXIT_FAILURE);
+    }
+    sprintf(result, "%.1lf %s", d_size, suffix[i]);
+    return result;
+
+}
+
+
 FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) {
     // struct stat dir_sb;
     // if (lstat(dirname, &dir_sb) == -1) {
@@ -243,7 +266,14 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
         struct group *gr = getgrgid(sb.st_gid);
         mx_strcpy(file_entry->owner, pw->pw_name);
         mx_strcpy(file_entry->group, gr->gr_name);
-        file_entry->size = sb.st_size;
+        if (flags->h) {
+            char *new_size = NULL;
+            new_size = mx_strjoin(new_size, format_size(sb.st_size));
+            mx_strcpy(file_entry->human_size, new_size);
+        } else {
+            file_entry->size = sb.st_size;
+        }
+        
 
 
     struct timespec timesp = sb.st_mtimespec;
