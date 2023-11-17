@@ -75,6 +75,7 @@ typedef struct {
     char owner[256];
     char group[256];
     long size;
+    char human_size[256];
     char modification_time[20];
     char symlink[1024];
 } FileEntry;
@@ -84,6 +85,7 @@ typedef struct {
     int max_username_len;
     int max_groupname_len;
     int max_size_len;
+    int max_h_size_len;
 } t_max_sizes_s;
 
 

@@ -142,9 +142,13 @@ void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize
     if(!flags->o){
         printstr_formatted(mx_char_to_str(file_entries[i].group), mxsize.max_groupname_len, true);
     }
-        
-    (file_entries[i].size == 0) ? mx_printstr(" ") : mx_printstr("  ");
-    printint_formatted(file_entries[i].size, mxsize.max_size_len);
+    if (flags->h){
+        printstr_formatted(mx_char_to_str(file_entries[i].human_size), mxsize.max_h_size_len, true);
+    } else {
+        (file_entries[i].size == 0) ? mx_printstr(" ") : mx_printstr("  ");
+        printint_formatted(file_entries[i].size, mxsize.max_size_len);
+    }
+    
     mx_printchar(' ');
     mx_printstr(file_entries[i].modification_time);
     mx_printchar(' ');
@@ -186,20 +190,27 @@ void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_f
         mx_printint(total_blocks);
         mx_printchar('\n');
     }
-    t_max_sizes_s t_mxsize = {.max_groupname_len = 0, .max_nlinks_len = 0, .max_size_len = 0, .max_username_len = 0};
+    t_max_sizes_s t_mxsize = {.max_groupname_len = 0, .max_nlinks_len = 0, .max_size_len = 0, .max_h_size_len = 0 ,.max_username_len = 0};
     for (int i = 0; i < count; ++i) { 
             int group_len = mx_strlen(file_entries[i].group);
             int nlinks_len = mx_intlen(file_entries[i].nlinks);
             int size_len = mx_intlen(file_entries[i].size);
             int name_len = mx_strlen(file_entries[i].group);
+            int h_size_len = mx_strlen(file_entries[i].human_size);
             if (group_len > t_mxsize.max_groupname_len) {
                 t_mxsize.max_groupname_len = group_len;
             }
             if (nlinks_len > t_mxsize.max_nlinks_len) {
                 t_mxsize.max_nlinks_len = nlinks_len;
             }
-            if (size_len > t_mxsize.max_size_len) {
-                t_mxsize.max_size_len = size_len;
+            if (flags->h){
+                if (h_size_len > t_mxsize.max_h_size_len) {
+                    t_mxsize.max_h_size_len = h_size_len;
+                }
+            } else {
+                if (size_len > t_mxsize.max_size_len) {
+                    t_mxsize.max_size_len = size_len;
+                }
             }
             if (name_len > t_mxsize.max_username_len) {
                 t_mxsize.max_username_len = name_len;
