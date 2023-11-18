@@ -26,7 +26,7 @@ typedef struct s_flags_n{
     bool l; // Flag for option 'l': Long format, showing detailed file information.
     bool c; // Flag for option 'c': Sort by change time, showing the newest first.
     bool u; // Flag for option 'u': Sort by access time, showing the newest first.
-    bool U;
+    bool U; //Use time when file was created for sorting or printing
     bool t; // Flag for option 't': Sort by modification time, showing the newest first.
     bool S; // Flag for option 'S': Sort by file size, showing the largest first.
     bool f; // Flag for option 'f': Disable sorting, and list entries in the order they appear.
@@ -45,8 +45,8 @@ typedef struct s_flags_n{
     bool o; //DONE Flag for option 'o': Like 'l', but excludes the group.
     bool x; // Flag for option 'x': List entries by lines, rather than columns.
     bool n; // Flag for option 'n': List numeric user and group IDs instead of names.
-    bool q;
-    bool H;
+    bool q; //Force printing of non-graphic characters in file names as the character ‘?’; this is the default when output is to a terminal.
+    bool H; //Symbolic links on the command line are followed.  This option is assumed if none of the -F, -d, or -l options are specified.
 
 
     // bool i; // Flag for option 'i': Show the file's inode number.
