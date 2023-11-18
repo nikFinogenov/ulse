@@ -212,6 +212,35 @@ else
     echo "\"uls temp_folder_for_test temp_folder_for_test2\" FALSE"
     echo "$diff_res"
 fi
+./uls -lh > $uls_output
+ls -lh > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -lh\" OK "
+else
+    echo "\"uls -lh\" FALSE"
+    echo "$diff_res"
+fi
+
+./uls -Rlh > $uls_output
+ls -Rlh > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -Rlh\" OK "
+else
+    echo "\"uls -Rlh\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -hl > $uls_output
+ls -hl > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -hl\" OK "
+else
+    echo "\"uls -hl\" FALSE"
+    # echo "$diff_res"
+fi
 
 
 # Очистить временные файлы

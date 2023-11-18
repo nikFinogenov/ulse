@@ -37,7 +37,7 @@ typedef struct s_flags_n{
     bool F; // Flag for option 'F': Append a character to entries to indicate their type.
     bool p; // Flag for option 'p': Add a trailing '/' to directory names.
     bool r; // Flag for option 'r': Reverse the order of listing.
-    bool h; // Flag for option 'h': Human-readable file sizes (e.g., in KB, MB).
+    bool h; //DONE Flag for option 'h': Human-readable file sizes (e.g., in KB, MB).
     bool e; // Flag for option 'e': Display the escape sequences for control characters.
     bool T; // Flag for option 'T': Display full time information.
     bool at; //Flag for option '@': Extended attribute keys.
@@ -78,6 +78,7 @@ typedef struct {
     char human_size[256];
     char modification_time[20];
     char symlink[1024];
+    char **xattr_keys;
 } FileEntry;
 
 typedef struct {
@@ -102,5 +103,5 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags);
 FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags);
 int compare_file_entries(const void *a, const void *b);
 void print_coma(const char *dirname, s_flags_t *flags);
-
+double custom_round(double value);
 #endif

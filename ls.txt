@@ -1,0 +1,207 @@
+total 272
+-rw-r--r--  1 nikfin  staff   701B Nov 16 00:24 Makefile
+-rw-r--r--  1 nikfin  staff     5B Nov 18 01:34 file1
+-rw-r--r--  1 nikfin  staff     5B Nov 18 01:34 file2
+-rw-r--r--  1 nikfin  staff     5B Nov 18 01:34 file3
+drwxr-xr-x  3 nikfin  staff    96B Nov 17 22:46 inc
+drwxr-xr-x  9 nikfin  staff   288B Nov 18 01:05 libmx
+-rw-r--r--  1 nikfin  staff     0B Nov 18 01:49 ls.txt
+drwxr-xr-x  8 nikfin  staff   256B Nov 18 01:44 obj
+-rw-r--r--  1 nikfin  staff    11K Nov 18 01:46 qwe.txt
+drwxr-xr-x  8 nikfin  staff   256B Nov 17 22:46 src
+drwxr-xr-x  6 nikfin  staff   192B Nov 18 01:19 temp
+-rwxr-xr-x  1 nikfin  staff   5.1K Nov 18 00:25 tests.sh
+-rwxr-xr-x  1 nikfin  staff    52K Nov 18 01:44 uls
+-rw-r--r--  1 nikfin  staff    11K Nov 18 01:49 uls.txt
+-rwxr-xr-x  1 nikfin  staff    35K Nov 17 01:23 uls_link
+
+./inc:
+total 16
+-rw-r--r--  1 nikfin  staff   4.4K Nov 17 22:46 uls.h
+
+./libmx:
+total 224
+-rw-r--r--   1 nikfin  staff   1.0K Nov 14 23:40 Makefile
+-rwxr-xr-x   1 nikfin  staff    33K Nov 15 02:05 a.out
+drwxr-xr-x   3 nikfin  staff    96B Nov 14 23:40 inc
+-rw-r--r--   1 nikfin  staff    66K Nov 18 01:05 libmx.a
+-rw-r--r--   1 nikfin  staff   114B Nov 15 02:04 main.c
+drwxr-xr-x  73 nikfin  staff   2.3K Nov 18 01:05 obj
+drwxr-xr-x  73 nikfin  staff   2.3K Nov 18 01:02 src
+
+./libmx/inc:
+total 8
+-rw-r--r--  1 nikfin  staff   3.6K Nov 18 01:03 libmx.h
+
+./libmx/obj:
+total 568
+-rw-r--r--  1 nikfin  staff   1.4K Nov 18 01:05 mx_atoi.o
+-rw-r--r--  1 nikfin  staff   784B Nov 18 01:05 mx_atoll.o
+-rw-r--r--  1 nikfin  staff   856B Nov 18 01:05 mx_binary_search.o
+-rw-r--r--  1 nikfin  staff   888B Nov 18 01:05 mx_bubble_sort.o
+-rw-r--r--  1 nikfin  staff   840B Nov 18 01:05 mx_char_to_str.o
+-rw-r--r--  1 nikfin  staff   856B Nov 18 01:05 mx_count_substr.o
+-rw-r--r--  1 nikfin  staff   792B Nov 18 01:05 mx_count_words.o
+-rw-r--r--  1 nikfin  staff   744B Nov 18 01:05 mx_create_node.o
+-rw-r--r--  1 nikfin  staff   1.1K Nov 18 01:05 mx_del_extra_spaces.o
+-rw-r--r--  1 nikfin  staff   800B Nov 18 01:05 mx_del_strarr.o
+-rw-r--r--  1 nikfin  staff   1.0K Nov 18 01:05 mx_file_to_str.o
+-rw-r--r--  1 nikfin  staff   688B Nov 18 01:05 mx_foreach.o
+-rw-r--r--  1 nikfin  staff   752B Nov 18 01:05 mx_get_char_index.o
+-rw-r--r--  1 nikfin  staff   768B Nov 18 01:05 mx_get_index.o
+-rw-r--r--  1 nikfin  staff   776B Nov 18 01:05 mx_get_substr_index.o
+-rw-r--r--  1 nikfin  staff   872B Nov 18 01:05 mx_hex_to_nbr.o
+-rw-r--r--  1 nikfin  staff   712B Nov 18 01:05 mx_intlen.o
+-rw-r--r--  1 nikfin  staff   688B Nov 18 01:05 mx_isalpha.o
+-rw-r--r--  1 nikfin  staff   656B Nov 18 01:05 mx_isdigit.o
+-rw-r--r--  1 nikfin  staff   672B Nov 18 01:05 mx_isprint.o
+-rw-r--r--  1 nikfin  staff   720B Nov 18 01:05 mx_isspace.o
+-rw-r--r--  1 nikfin  staff   1.1K Nov 18 01:05 mx_itoa.o
+-rw-r--r--  1 nikfin  staff   672B Nov 18 01:05 mx_list_size.o
+-rw-r--r--  1 nikfin  staff   1.1K Nov 18 01:05 mx_lltoa.o
+-rw-r--r--  1 nikfin  staff   776B Nov 18 01:05 mx_memccpy.o
+-rw-r--r--  1 nikfin  staff   736B Nov 18 01:05 mx_memchr.o
+-rw-r--r--  1 nikfin  staff   768B Nov 18 01:05 mx_memcmp.o
+-rw-r--r--  1 nikfin  staff   712B Nov 18 01:05 mx_memcpy.o
+-rw-r--r--  1 nikfin  staff   864B Nov 18 01:05 mx_memmem.o
+-rw-r--r--  1 nikfin  staff   816B Nov 18 01:05 mx_memmove.o
+-rw-r--r--  1 nikfin  staff   744B Nov 18 01:05 mx_memrchr.o
+-rw-r--r--  1 nikfin  staff   696B Nov 18 01:05 mx_memset.o
+-rw-r--r--  1 nikfin  staff   904B Nov 18 01:05 mx_nbr_to_hex.o
+-rw-r--r--  1 nikfin  staff   808B Nov 18 01:05 mx_pop_back.o
+-rw-r--r--  1 nikfin  staff   720B Nov 18 01:05 mx_pop_front.o
+-rw-r--r--  1 nikfin  staff   808B Nov 18 01:05 mx_pow.o
+-rw-r--r--  1 nikfin  staff   848B Nov 18 01:05 mx_print_strarr.o
+-rw-r--r--  1 nikfin  staff   1.0K Nov 18 01:05 mx_print_unicode.o
+-rw-r--r--  1 nikfin  staff   680B Nov 18 01:05 mx_printchar.o
+-rw-r--r--  1 nikfin  staff   728B Nov 18 01:05 mx_printerr.o
+-rw-r--r--  1 nikfin  staff   1.3K Nov 18 01:05 mx_printint.o
+-rw-r--r--  1 nikfin  staff   728B Nov 18 01:05 mx_printstr.o
+-rw-r--r--  1 nikfin  staff   784B Nov 18 01:05 mx_push_back.o
+-rw-r--r--  1 nikfin  staff   728B Nov 18 01:05 mx_push_front.o
+-rw-r--r--  1 nikfin  staff   1.1K Nov 18 01:05 mx_quicksort.o
+-rw-r--r--  1 nikfin  staff   1.2K Nov 18 01:05 mx_read_line.o
+-rw-r--r--  1 nikfin  staff   984B Nov 18 01:05 mx_realloc.o
+-rw-r--r--  1 nikfin  staff   1.1K Nov 18 01:05 mx_replace_substr.o
+-rw-r--r--  1 nikfin  staff   864B Nov 18 01:05 mx_sort_list.o
+-rw-r--r--  1 nikfin  staff   800B Nov 18 01:05 mx_sqrt.o
+-rw-r--r--  1 nikfin  staff   1.0K Nov 18 01:05 mx_sscanf.o
+-rw-r--r--  1 nikfin  staff   832B Nov 18 01:05 mx_str_reverse.o
+-rw-r--r--  1 nikfin  staff   784B Nov 18 01:05 mx_strcat.o
+-rw-r--r--  1 nikfin  staff   768B Nov 18 01:05 mx_strchr.o
+-rw-r--r--  1 nikfin  staff   808B Nov 18 01:05 mx_strcmp.o
+-rw-r--r--  1 nikfin  staff   704B Nov 18 01:05 mx_strcpy.o
+-rw-r--r--  1 nikfin  staff   712B Nov 18 01:05 mx_strdel.o
+-rw-r--r--  1 nikfin  staff   832B Nov 18 01:05 mx_strdup.o
+-rw-r--r--  1 nikfin  staff   1.0K Nov 18 01:05 mx_strjoin.o
+-rw-r--r--  1 nikfin  staff   672B Nov 18 01:05 mx_strlen.o
+-rw-r--r--  1 nikfin  staff   784B Nov 18 01:05 mx_strncat.o
+-rw-r--r--  1 nikfin  staff   800B Nov 18 01:05 mx_strncmp.o
+-rw-r--r--  1 nikfin  staff   728B Nov 18 01:05 mx_strncpy.o
+-rw-r--r--  1 nikfin  staff   864B Nov 18 01:05 mx_strndup.o
+-rw-r--r--  1 nikfin  staff   784B Nov 18 01:05 mx_strnew.o
+-rw-r--r--  1 nikfin  staff   1.1K Nov 18 01:05 mx_strsplit.o
+-rw-r--r--  1 nikfin  staff   896B Nov 18 01:05 mx_strstr.o
+-rw-r--r--  1 nikfin  staff   1.1K Nov 18 01:05 mx_strtok.o
+-rw-r--r--  1 nikfin  staff   1.0K Nov 18 01:05 mx_strtrim.o
+-rw-r--r--  1 nikfin  staff   680B Nov 18 01:05 mx_swap_char.o
+-rw-r--r--  1 nikfin  staff   664B Nov 18 01:05 mx_swap_str.o
+
+./libmx/src:
+total 568
+-rw-r--r--  1 nikfin  staff   1.1K Nov 11 00:58 mx_atoi.c
+-rw-r--r--  1 nikfin  staff   443B Nov 11 00:58 mx_atoll.c
+-rw-r--r--  1 nikfin  staff   477B Nov 11 00:58 mx_binary_search.c
+-rw-r--r--  1 nikfin  staff   434B Nov 11 00:58 mx_bubble_sort.c
+-rw-r--r--  1 nikfin  staff   291B Nov 15 02:07 mx_char_to_str.c
+-rw-r--r--  1 nikfin  staff   365B Nov 11 00:58 mx_count_substr.c
+-rw-r--r--  1 nikfin  staff   387B Nov 11 00:58 mx_count_words.c
+-rw-r--r--  1 nikfin  staff   252B Nov 11 00:58 mx_create_node.c
+-rw-r--r--  1 nikfin  staff   610B Nov 11 00:58 mx_del_extra_spaces.c
+-rw-r--r--  1 nikfin  staff   311B Nov 11 00:58 mx_del_strarr.c
+-rw-r--r--  1 nikfin  staff   588B Nov 11 00:58 mx_file_to_str.c
+-rw-r--r--  1 nikfin  staff   144B Nov 11 00:58 mx_foreach.c
+-rw-r--r--  1 nikfin  staff   248B Nov 11 00:58 mx_get_char_index.c
+-rw-r--r--  1 nikfin  staff   211B Nov 11 00:58 mx_get_index.c
+-rw-r--r--  1 nikfin  staff   282B Nov 11 00:58 mx_get_substr_index.c
+-rw-r--r--  1 nikfin  staff   565B Nov 11 00:58 mx_hex_to_nbr.c
+-rw-r--r--  1 nikfin  staff   172B Nov 14 23:40 mx_intlen.c
+-rw-r--r--  1 nikfin  staff   110B Nov 11 00:58 mx_isalpha.c
+-rw-r--r--  1 nikfin  staff    87B Nov 11 00:58 mx_isdigit.c
+-rw-r--r--  1 nikfin  staff   113B Nov 11 00:58 mx_isprint.c
+-rw-r--r--  1 nikfin  staff   160B Nov 11 00:58 mx_isspace.c
+-rw-r--r--  1 nikfin  staff   847B Nov 11 00:58 mx_itoa.c
+-rw-r--r--  1 nikfin  staff   175B Nov 11 00:58 mx_list_size.c
+-rw-r--r--  1 nikfin  staff   620B Nov 18 01:05 mx_lltoa.c
+-rw-r--r--  1 nikfin  staff   413B Nov 11 00:58 mx_memccpy.c
+-rw-r--r--  1 nikfin  staff   283B Nov 11 00:58 mx_memchr.c
+-rw-r--r--  1 nikfin  staff   350B Nov 11 00:58 mx_memcmp.c
+-rw-r--r--  1 nikfin  staff   310B Nov 11 00:58 mx_memcpy.c
+-rw-r--r--  1 nikfin  staff   557B Nov 11 00:58 mx_memmem.c
+-rw-r--r--  1 nikfin  staff   418B Nov 11 00:58 mx_memmove.c
+-rw-r--r--  1 nikfin  staff   292B Nov 11 00:58 mx_memrchr.c
+-rw-r--r--  1 nikfin  staff   246B Nov 11 00:58 mx_memset.c
+-rw-r--r--  1 nikfin  staff   661B Nov 11 00:58 mx_nbr_to_hex.c
+-rw-r--r--  1 nikfin  staff   373B Nov 11 00:58 mx_pop_back.c
+-rw-r--r--  1 nikfin  staff   178B Nov 11 00:58 mx_pop_front.c
+-rw-r--r--  1 nikfin  staff   235B Nov 11 00:58 mx_pow.c
+-rw-r--r--  1 nikfin  staff   339B Nov 11 00:58 mx_print_strarr.c
+-rw-r--r--  1 nikfin  staff   616B Nov 11 00:58 mx_print_unicode.c
+-rw-r--r--  1 nikfin  staff    78B Nov 11 00:58 mx_printchar.c
+-rw-r--r--  1 nikfin  staff    94B Nov 11 00:58 mx_printerr.c
+-rw-r--r--  1 nikfin  staff   788B Nov 11 00:58 mx_printint.c
+-rw-r--r--  1 nikfin  staff    96B Nov 11 00:58 mx_printstr.c
+-rw-r--r--  1 nikfin  staff   396B Nov 11 00:58 mx_push_back.c
+-rw-r--r--  1 nikfin  staff   220B Nov 11 00:58 mx_push_front.c
+-rw-r--r--  1 nikfin  staff   830B Nov 11 00:58 mx_quicksort.c
+-rw-r--r--  1 nikfin  staff   1.1K Nov 11 00:58 mx_read_line.c
+-rw-r--r--  1 nikfin  staff   451B Nov 11 00:58 mx_realloc.c
+-rw-r--r--  1 nikfin  staff   700B Nov 11 00:58 mx_replace_substr.c
+-rw-r--r--  1 nikfin  staff   650B Nov 11 00:58 mx_sort_list.c
+-rw-r--r--  1 nikfin  staff   510B Nov 11 00:58 mx_sqrt.c
+-rw-r--r--  1 nikfin  staff   1.0K Nov 11 00:58 mx_sscanf.c
+-rw-r--r--  1 nikfin  staff   298B Nov 11 00:58 mx_str_reverse.c
+-rw-r--r--  1 nikfin  staff   347B Nov 11 00:58 mx_strcat.c
+-rw-r--r--  1 nikfin  staff   173B Nov 11 00:58 mx_strchr.c
+-rw-r--r--  1 nikfin  staff   345B Nov 11 00:58 mx_strcmp.c
+-rw-r--r--  1 nikfin  staff   221B Nov 11 00:58 mx_strcpy.c
+-rw-r--r--  1 nikfin  staff   141B Nov 11 00:58 mx_strdel.c
+-rw-r--r--  1 nikfin  staff   301B Nov 11 00:58 mx_strdup.c
+-rw-r--r--  1 nikfin  staff   530B Nov 11 00:58 mx_strjoin.c
+-rw-r--r--  1 nikfin  staff   165B Nov 11 00:58 mx_strlen.c
+-rw-r--r--  1 nikfin  staff   251B Nov 11 00:58 mx_strncat.c
+-rw-r--r--  1 nikfin  staff   212B Nov 11 00:58 mx_strncmp.c
+-rw-r--r--  1 nikfin  staff   195B Nov 11 00:58 mx_strncpy.c
+-rw-r--r--  1 nikfin  staff   383B Nov 11 00:58 mx_strndup.c
+-rw-r--r--  1 nikfin  staff   295B Nov 11 00:58 mx_strnew.c
+-rw-r--r--  1 nikfin  staff   952B Nov 11 00:58 mx_strsplit.c
+-rw-r--r--  1 nikfin  staff   530B Nov 11 00:58 mx_strstr.c
+-rw-r--r--  1 nikfin  staff   422B Nov 11 00:58 mx_strtok.c
+-rw-r--r--  1 nikfin  staff   760B Nov 11 00:58 mx_strtrim.c
+-rw-r--r--  1 nikfin  staff   159B Nov 11 00:58 mx_swap_char.c
+-rw-r--r--  1 nikfin  staff   112B Nov 11 00:58 mx_swap_str.c
+
+./obj:
+total 72
+-rw-r--r--  1 nikfin  staff   3.1K Nov 18 01:05 main.o
+-rw-r--r--  1 nikfin  staff   2.1K Nov 18 01:05 parse_args.o
+-rw-r--r--  1 nikfin  staff   6.9K Nov 18 01:44 print.o
+-rw-r--r--  1 nikfin  staff   208B Nov 18 01:05 uls_errors.o
+-rw-r--r--  1 nikfin  staff    11K Nov 18 01:05 uls_utils.o
+-rw-r--r--  1 nikfin  staff   208B Nov 18 01:05 uls_validation.o
+
+./src:
+total 104
+-rw-r--r--  1 nikfin  staff   4.2K Nov 17 01:27 main.c
+-rw-r--r--  1 nikfin  staff   4.1K Nov 17 01:44 parse_args.c
+-rw-r--r--  1 nikfin  staff   8.5K Nov 18 01:44 print.c
+-rw-r--r--  1 nikfin  staff    17B Nov 11 00:58 uls_errors.c
+-rw-r--r--  1 nikfin  staff    15K Nov 18 01:04 uls_utils.c
+-rw-r--r--  1 nikfin  staff    17B Nov 11 00:58 uls_validation.c
+
+./temp:
+total 24
+-rw-r--r--  1 nikfin  staff     5B Nov 18 01:34 3f
+-rw-r--r--  1 nikfin  staff     5B Nov 18 01:34 f1
+-rw-r--r--  1 nikfin  staff     5B Nov 18 01:34 f2
+lrwxr-xr-x  1 nikfin  staff     4B Nov 16 22:01 temp -> temp

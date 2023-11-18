@@ -45,8 +45,7 @@ int main(int argc, char *argv[]) {
     char **dirs;
     int count_args = parse_args(argc, argv, &flags);
     int count_dirs = parse_dirs(argc, argv, &dirs);
-    while (count_args)
-    {
+    while (count_args) {
         break;
     }
     

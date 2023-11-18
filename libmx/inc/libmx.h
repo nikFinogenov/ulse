@@ -23,6 +23,8 @@ typedef struct s_list {
     struct s_list *next;
 } t_list;
 
+char *mx_double_to_str(double number);
+char *mx_lltoa(long long n);
 int mx_intlen(int n);
 char* mx_char_to_str(const char source[]);
 int mx_get_index(char **strarr, char *str);
