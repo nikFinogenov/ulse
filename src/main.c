@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
     init_flags(&flags);
     char **dirs;
     int count_args = parse_args(argc, argv, &flags);
+    if(!isatty(1)) flags.G = false;
     int count_dirs = parse_dirs(argc, argv, &dirs);
     while (count_args) {
         break;
@@ -78,6 +79,7 @@ int main(int argc, char *argv[]) {
             }
             FileEntry *file_entries;
             if (S_ISLNK(sb.st_mode)) {
+                // printf("%s\n", dirname);
                 file_entries = fill_link_entry(dirname, &flags);
                 count_files = 1;
             }

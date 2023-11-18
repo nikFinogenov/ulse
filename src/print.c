@@ -64,6 +64,7 @@ void print_multicolumn(const char *dirname, s_flags_t *flags) {
             }
         }
         int tab = 8;
+        if(flags->G) tab = 1;
         int width = (max_name_length + tab) & ~(tab - 1);
         int num_columns = terminal_width / width;
         int index = 0;
@@ -71,7 +72,17 @@ void print_multicolumn(const char *dirname, s_flags_t *flags) {
         for (int i = 0; i < rows; ++i) {
             index = i;
             for (int j = 0; j < num_columns; j++) {
+            if(flags->G) {
+                struct stat sb;
+                // printf("%d\n", index);
+                if (lstat(mx_strjoin(mx_strjoin(dirname, "/"), files[index]), &sb) == -1) {
+                    perror("Cannot get file information");
+                    continue;
+                }   
+                switch_strcolor(sb);
+            }
                 mx_printstr(files[index]);
+                if(flags->G) mx_printstr(DEFAULT_COLOR);
                 int name_len = mx_strlen(files[index]);
                 index = index + rows;
                 if (index >= num_files)
@@ -98,7 +109,7 @@ void print_xattr(const FileEntry *file_entry, s_flags_t *flags) {
         mx_printchar('\t');
         mx_printstr(*ptr);
         mx_printchar('\t');
-        ssize_t value_size = getxattr(file_entry->name, *ptr, NULL, 0, 0, XATTR_NOFOLLOW);
+        ssize_t value_size = getxattr(file_entry->path, *ptr, NULL, 0, 0, XATTR_NOFOLLOW);
 
         if (flags->h) {
             const char *suffixes[] = {"B", "K", "M", "G", "T", "P"};
@@ -134,7 +145,7 @@ void print_xattr(const FileEntry *file_entry, s_flags_t *flags) {
             printstr_formatted(result, 5, true);
         }
         else {
-            printint_formatted(value_size, 4);
+            printint_formatted(value_size, 5);
         }
 
         mx_printstr(" \n");
@@ -161,7 +172,17 @@ void print_perline(const char *dirname, s_flags_t *flags) {
     if (num_files > 0)
         custom_qsort(files, num_files, sizeof(char *), compare_names);
     for (int i = 0; i < num_files; i++) {
-        mx_printstr(files[i]);
+        // mx_printstr(files[i]);
+                    if(flags->G) {
+                struct stat sb;
+                if (lstat(mx_strjoin(mx_strjoin(dirname, "/"), files[i]), &sb) == -1) {
+                    perror("Cannot get file information");
+                    continue;
+                }   
+                switch_strcolor(sb);
+            }
+                mx_printstr(files[i]);
+                if(flags->G) mx_printstr(DEFAULT_COLOR);
         mx_printchar('\n');
     }
     for (int i = 0; i < num_files; ++i) {
@@ -210,7 +231,17 @@ void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize
     mx_printchar(' ');
     mx_printstr(file_entries[i].modification_time);
     mx_printchar(' ');
-    mx_printstr(file_entries[i].name);
+    // mx_printstr(file_entries[i].name);
+                        if(flags->G) {
+                struct stat sb;
+                if (lstat(file_entries[i].path, &sb) == -1) {
+                    perror("Cannot get file information");
+                    // continue;
+                }   
+                switch_strcolor(sb);
+            }
+                mx_printstr(file_entries[i].name);
+                if(flags->G) mx_printstr(DEFAULT_COLOR);
 
     if (file_entries[i].type == 'l') {
         mx_printstr(" -> ");
@@ -317,9 +348,16 @@ void print_coma(const char *dirname, s_flags_t *flags) {
             mx_printchar('\n');
             total_width = 0;
         }
-        mx_printstr(files[i]);
-        if (i + 1 != num_files)
-            mx_printstr(", ");
+            if(flags->G) {
+                struct stat sb;
+                if (lstat(mx_strjoin(mx_strjoin(dirname, "/"), files[i]), &sb) == -1) {
+                    perror("Cannot get file information");
+                }   
+                switch_strcolor(sb);
+            }
+                mx_printstr(files[i]);
+                if(flags->G) mx_printstr(DEFAULT_COLOR);
+        if (i + 1 != num_files) mx_printstr(", ");
         total_width = total_width + mx_strlen(files[i]) + 2;
     }
     mx_printchar('\n');

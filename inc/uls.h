@@ -18,12 +18,20 @@
 #include <string.h>
 
 #define MAX_FLAGS 34
+#define DEFAULT_COLOR "\033[0m"
+#define RESET_COLOR "\033[0m"
+#define BLUE_COLOR "\033[34m"
+#define GREEN_COLOR "\033[32m"
+#define CYAN_COLOR "\033[36m"
+#define MAGENTA_COLOR "\033[35m"
+#define YELLOW_COLOR "\033[33m"
+#define RED_COLOR "\033[31m"
 
 typedef struct s_flags_n{
     bool one; //DONE Flag for option '1': List one entry per line.
     bool C; //DONE Flag for option 'C': Force multi-column output.
     bool m; //DONE comma separated output
-    bool l; // Flag for option 'l': Long format, showing detailed file information.
+    bool l; //DONE Flag for option 'l': Long format, showing detailed file information.
     bool c; // Flag for option 'c': Sort by change time, showing the newest first.
     bool u; // Flag for option 'u': Sort by access time, showing the newest first.
     bool U; //Use time when file was created for sorting or printing
@@ -33,14 +41,14 @@ typedef struct s_flags_n{
     bool A; // Flag for option 'A': Lists all entries except for '.' and '..'.
     bool a; //DONE Flag for option 'a': Usually stands for "all", showing hidden files.       
     bool R; //DONE Flag for option 'R': Recursively list subdirectories.
-    bool G; // Flag for option 'G': Enable colored output.
+    bool G; //DONE Flag for option 'G': Enable colored output.
     bool F; // Flag for option 'F': Append a character to entries to indicate their type.
     bool p; // Flag for option 'p': Add a trailing '/' to directory names.
     bool r; // Flag for option 'r': Reverse the order of listing.
     bool h; //DONE Flag for option 'h': Human-readable file sizes (e.g., in KB, MB).
     bool e; // Flag for option 'e': Display the escape sequences for control characters.
     bool T; // Flag for option 'T': Display full time information.
-    bool at; //Flag for option '@': Extended attribute keys.
+    bool at; //DONE Flag for option '@': Extended attribute keys.
     bool g; //DONE Flag for option 'g': Like 'l', but excludes the owner.
     bool o; //DONE Flag for option 'o': Like 'l', but excludes the group.
     bool x; // Flag for option 'x': List entries by lines, rather than columns.
@@ -69,6 +77,7 @@ typedef struct {
 
 typedef struct {
     char *name;
+    char *path;
     char type;
     char permissions[11];
     int nlinks;
@@ -89,8 +98,7 @@ typedef struct {
     int max_h_size_len;
 } t_max_sizes_s;
 
-
-
+void switch_strcolor(struct stat sb);
 int parse_args(int argc, char *argv[], s_flags_t *flags);
 int parse_dirs(int argc, char *argv[], char ***dirs);
 void print_multicolumn(const char *dirname, s_flags_t *flags);
