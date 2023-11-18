@@ -9,9 +9,11 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                 switch (argv[i][j]) {
                     case 'a':
                         flags->a = true;
+                        flags->A = false;
                         break;
                     case 'A':
-                        flags->A = true;
+                        if(!flags->a) flags->A = true;
+                        flags->a = true;
                         break;
                     case 'l':
                         flags->l = true;

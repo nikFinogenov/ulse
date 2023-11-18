@@ -169,24 +169,15 @@ FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags) {
 }
 void switch_strcolor(struct stat sb) {
 switch (sb.st_mode & S_IFMT) {
-    // case S_IFBLK:
-    //     mx_printstr(BLUE_COLOR);
-    //     break;
+    case S_IFBLK:
+        mx_printstr(BLUE_COLOR);
+        break;
 
-    // case S_IFCHR:
-    //     mx_printstr(BLUE_COLOR);
-    //     break;
+    case S_IFCHR:
+        mx_printstr(BLUE_COLOR);
+        break;
 
     case S_IFDIR:
-        // if (sb.st_mode & S_IWOTH) {
-        //     if (sb.st_mode & S_ISTXT) {
-        //         mx_printstr("\033[30;42m");
-        //     } else {
-        //         mx_printstr("\033[30;43m");
-        //     }
-        // } else {
-        //     mx_printstr(BLUE_COLOR);
-        // }
         mx_printstr(BLUE_COLOR);
         break;
 
@@ -277,8 +268,8 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
     }
     *count = 0;
     while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_name[0] == '.' && !flags->a)
-            continue;
+        if ((mx_strcmp(entry->d_name, ".") == 0 || mx_strcmp(entry->d_name, "..") == 0) && flags->A) continue;
+        if (entry->d_name[0] == '.' && !flags->a) continue;
         (*count)++;
     }
     closedir(dir);
@@ -298,8 +289,8 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
 
     int index = 0;
     while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_name[0] == '.' && !flags->a)
-            continue;
+        if ((mx_strcmp(entry->d_name, ".") == 0 || mx_strcmp(entry->d_name, "..") == 0) && flags->A) continue;
+        if (entry->d_name[0] == '.' && !flags->a) continue;
 
         file_path = mx_strjoin(mx_strjoin(dirname, "/"), entry->d_name);
 

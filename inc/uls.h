@@ -38,12 +38,12 @@ typedef struct s_flags_n{
     bool t; // Flag for option 't': Sort by modification time, showing the newest first.
     bool S; // Flag for option 'S': Sort by file size, showing the largest first.
     bool f; // Flag for option 'f': Disable sorting, and list entries in the order they appear.
-    bool A; // Flag for option 'A': Lists all entries except for '.' and '..'.
+    bool A; //DONE Flag for option 'A': Lists all entries except for '.' and '..'.
     bool a; //DONE Flag for option 'a': Usually stands for "all", showing hidden files.       
     bool R; //DONE Flag for option 'R': Recursively list subdirectories.
     bool G; //DONE Flag for option 'G': Enable colored output.
     bool F; // Flag for option 'F': Append a character to entries to indicate their type.
-    bool p; // Flag for option 'p': Add a trailing '/' to directory names.
+    bool p; //DONE Flag for option 'p': Add a trailing '/' to directory names.
     bool r; // Flag for option 'r': Reverse the order of listing.
     bool h; //DONE Flag for option 'h': Human-readable file sizes (e.g., in KB, MB).
     bool e; // Flag for option 'e': Display the escape sequences for control characters.
