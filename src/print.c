@@ -1,6 +1,14 @@
 #include "uls.h"
 #include "stdlib.h"
 
+static bool is_dir(const char *filename) {
+    struct stat st;
+    if (stat(filename, &st) == 0) {
+        return S_ISDIR(st.st_mode);
+    }
+    return false;
+}
+
 static void printint_formatted(int n, int width) {
     int num_width = 0;
     int temp = n;
@@ -81,7 +89,12 @@ void print_multicolumn(const char *dirname, s_flags_t *flags) {
                 }   
                 switch_strcolor(sb);
             }
-                mx_printstr(files[index]);
+                if (flags->p && is_dir(files[index])) {
+                    mx_printstr(mx_strcat(files[index],"/"));
+                } else {
+                    mx_printstr(files[index]);  
+                }
+
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
                 int name_len = mx_strlen(files[index]);
                 index = index + rows;
@@ -181,7 +194,12 @@ void print_perline(const char *dirname, s_flags_t *flags) {
                 }   
                 switch_strcolor(sb);
             }
-                mx_printstr(files[i]);
+                if (flags->p && is_dir(files[i])) {
+                    mx_printstr(mx_strcat(files[i],"/"));
+                } else {
+                    mx_printstr(files[i]);  
+                }
+
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
         mx_printchar('\n');
     }
@@ -240,7 +258,11 @@ void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize
                 }   
                 switch_strcolor(sb);
             }
-                mx_printstr(file_entries[i].name);
+                if (flags->p && is_dir(file_entries[i].name)) {
+                    mx_printstr(mx_strcat(file_entries[i].name,"/"));
+                } else {
+                    mx_printstr(file_entries[i].name);  
+                }
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
 
     if (file_entries[i].type == 'l') {
@@ -355,7 +377,11 @@ void print_coma(const char *dirname, s_flags_t *flags) {
                 }   
                 switch_strcolor(sb);
             }
-                mx_printstr(files[i]);
+                if (flags->p && is_dir(files[i])) {
+                    mx_printstr(mx_strcat(files[i],"/"));
+                } else {
+                    mx_printstr(files[i]);  
+                }
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
         if (i + 1 != num_files) mx_printstr(", ");
         total_width = total_width + mx_strlen(files[i]) + 2;
