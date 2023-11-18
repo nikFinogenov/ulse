@@ -5,7 +5,7 @@ int compare_names(const void *a, const void *b) {
 }
 
 int compare_file_entries(const void *a, const void *b) {
-    return strcmp(((FileEntry *)a)->name, ((FileEntry *)b)->name);
+    return mx_strcmp(((FileEntry *)a)->name, ((FileEntry *)b)->name);
 }
 
 void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*comparator)(const void *, const void *)) {
@@ -55,11 +55,11 @@ void init_flags(s_flags_t *flags) {
 char **get_xattr(const char *filename) {
     char buffer[1024] = {'\0'};
     ssize_t count = listxattr(filename, buffer, sizeof(buffer), XATTR_NOFOLLOW);
-
+    // printf("%zd\n", count);
     for (int i = 0; i < count - 1; i++)
-        if (buffer[i] == '\0') buffer[i] = ':';
+        if (buffer[i] == '\0') buffer[i] = '|';
 
-    if (count > 0) return mx_strsplit(buffer, ':');
+    if (count > 0) return mx_strsplit(buffer, '|');
 
     return NULL;
 }
@@ -73,6 +73,7 @@ FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags) {
     }
     FileEntry *file_entry = malloc(sizeof(FileEntry));
     file_entry->name = mx_strdup(linkname);
+    file_entry->path = mx_strdup(linkname);
     file_entry->type = 'l';
     char *new_permissions = NULL;
     new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IRUSR) ? "r" : "-");
@@ -162,10 +163,59 @@ FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags) {
     else {
         file_entry->symlink[0] = '\0';
     }
+    file_entry->xattr_keys = get_xattr(linkname);
 
     return file_entry;
 }
+void switch_strcolor(struct stat sb) {
+switch (sb.st_mode & S_IFMT) {
+    // case S_IFBLK:
+    //     mx_printstr(BLUE_COLOR);
+    //     break;
 
+    // case S_IFCHR:
+    //     mx_printstr(BLUE_COLOR);
+    //     break;
+
+    case S_IFDIR:
+        // if (sb.st_mode & S_IWOTH) {
+        //     if (sb.st_mode & S_ISTXT) {
+        //         mx_printstr("\033[30;42m");
+        //     } else {
+        //         mx_printstr("\033[30;43m");
+        //     }
+        // } else {
+        //     mx_printstr(BLUE_COLOR);
+        // }
+        mx_printstr(BLUE_COLOR);
+        break;
+
+    case S_IFIFO:
+        mx_printstr(YELLOW_COLOR);
+        break;
+
+    case S_IFLNK:
+        mx_printstr(MAGENTA_COLOR);
+        break;
+
+    case S_IFSOCK:
+        mx_printstr(GREEN_COLOR);
+        break;
+
+    default:
+        if (sb.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+            // if (sb.st_mode & S_ISUID) {
+            //     mx_printstr("\033[30;41m");
+            // } else if (sb.st_mode & S_ISGID) {
+            //     mx_printstr("\033[30;46m");
+            // } else {
+                mx_printstr(RED_COLOR);
+            // }
+        }
+        // mx_printstr(DEFAULT_COLOR);
+        break;
+    }
+}
 double custom_round(double value) {
     double result = value + 0.5;
     return (long)result;
@@ -260,7 +310,8 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
 
         FileEntry *file_entry = &file_entries[index];
 
-        file_entry->name = strdup(entry->d_name);
+        file_entry->name = mx_strdup(entry->d_name);
+        file_entry->path = mx_strdup(file_path);
         if (file_entry->name == NULL) {
             perror("strdup");
             free(file_entries->name);
@@ -381,6 +432,8 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
         index++;
 
         file_entry->xattr_keys = get_xattr(file_path);
+        // if(file_entry->xattr_keys != NULL)
+        //     printf("%s\n", file_entry->xattr_keys[0]);
     }
 
     closedir(dir);

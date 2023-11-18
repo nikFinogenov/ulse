@@ -1,0 +1,19 @@
+Makefile
+file1
+file2
+file3
+inc
+irepe.txt
+libmx
+ln_file1
+ls.txt
+obj
+qwe.txt
+src
+temp
+tests.sh
+uls
+uls.txt
+uls_link
+videoplayback (1).mp4
+videoplayback.mp4
