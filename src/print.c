@@ -45,8 +45,9 @@ void print_multicolumn(const char *dirname, s_flags_t *flags) {
     }
 
     while ((dir_entry = readdir(dir)) != NULL) {
-        if (dir_entry->d_name[0] == '.' && !flags->a)
-            continue;
+        if ((mx_strcmp(dir_entry->d_name, ".") == 0 || mx_strcmp(dir_entry->d_name, "..") == 0) && flags->A) continue;
+        if (dir_entry->d_name[0] == '.' && !flags->a) continue;
+            
         files = mx_realloc(files, (num_files + 1) * sizeof(char *));
         files[num_files] = mx_strdup(dir_entry->d_name);
         num_files++;
@@ -176,8 +177,8 @@ void print_perline(const char *dirname, s_flags_t *flags) {
         exit(1);
     }
     while ((dir_entry = readdir(dir)) != NULL) {
-        if (dir_entry->d_name[0] == '.' && !flags->a)
-            continue;
+        if ((mx_strcmp(dir_entry->d_name, ".") == 0 || mx_strcmp(dir_entry->d_name, "..") == 0) && flags->A) continue;
+        if (dir_entry->d_name[0] == '.' && !flags->a) continue;
         files = mx_realloc(files, (num_files + 1) * sizeof(char *));
         files[num_files] = mx_strdup(dir_entry->d_name);
         num_files++;
@@ -294,8 +295,8 @@ void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_f
         mx_printstr("total ");
 
         for (int i = 0; i < count; ++i) {
-            if (file_entries[i].name[0] == '.' && !flags->a)
-                continue;
+            // if (file_entries[i].name[0] == '.' && !flags->a)
+            //     continue;
             mx_strcpy(file_path, mx_strjoin(mx_strjoin(dirname, "/"), file_entries[i].name));
             if (lstat(file_path, &sb) == -1) {
                 perror("Cannot get file information");
@@ -356,8 +357,8 @@ void print_coma(const char *dirname, s_flags_t *flags) {
     }
     int total_width = 0;
     while ((dir_entry = readdir(dir)) != NULL) {
-        if (dir_entry->d_name[0] == '.' && !flags->a)
-            continue;
+        if ((mx_strcmp(dir_entry->d_name, ".") == 0 || mx_strcmp(dir_entry->d_name, "..") == 0) && flags->A) continue;
+        if (dir_entry->d_name[0] == '.' && !flags->a) continue;
         files = mx_realloc(files, (num_files + 1) * sizeof(char *));
         files[num_files] = mx_strdup(dir_entry->d_name);
         num_files++;
