@@ -6,10 +6,22 @@ int compare_names(const void *a, const void *b, bool rev) {
     return mx_strcmp(*(const char **)b, *(const char **)a);
 }
 
-int compare_file_entries(const void *a, const void *b, bool rev) {
+int compare_file_entries_name(const void *a, const void *b, bool rev) {
     if(!rev)
         return mx_strcmp(((FileEntry *)a)->name, ((FileEntry *)b)->name);
     return mx_strcmp(((FileEntry *)b)->name, ((FileEntry *)a)->name);
+}
+
+int compare_file_entries_modification_time(const void *a, const void *b, bool rev) {
+    if(!rev)
+        return mx_strcmp(((FileEntry *)a)->modification_time, ((FileEntry *)b)->modification_time);
+    return mx_strcmp(((FileEntry *)b)->modification_time, ((FileEntry *)a)->modification_time);
+}
+
+int compare_file_entries_size(const void *a, const void *b, bool rev) {
+    if(!rev)
+        return ((FileEntry *)b)->size - ((FileEntry *)a)->size;
+    return ((FileEntry *)a)->size - ((FileEntry *)b)->size;
 }
 
 void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*comparator)(const void *, const void *, bool), s_flags_t *flags) {

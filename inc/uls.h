@@ -78,6 +78,7 @@ typedef struct {
 } s_flag_order_t;
 
 typedef struct {
+    unsigned long inode;
     char *name;
     char *path;
     char type;
@@ -111,7 +112,9 @@ void init_flags(s_flags_t *flags);
 void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_flags_t *flags);
 FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags);
 FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags);
-int compare_file_entries(const void *a, const void *b, bool rev);
+int compare_file_entries_name(const void *a, const void *b, bool rev);
+int compare_file_entries_size(const void *a, const void *b, bool rev);
+int compare_file_entries_modification_time(const void *a, const void *b, bool rev);
 void print_coma(const char *dirname, s_flags_t *flags);
 double custom_round(double value);
 #endif
