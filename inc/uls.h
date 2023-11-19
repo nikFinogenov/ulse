@@ -54,6 +54,7 @@ typedef struct s_flags_n{
     bool x; //? Flag for option 'x': List entries by lines, rather than columns.
     bool n; // Flag for option 'n': List numeric user and group IDs instead of names.
     
+    
     bool q; //? Flag Force printing of non-graphic characters in file names as the character ‘?’; this is the default when output is to a terminal.
     bool H; //? Flag Symbolic links on the command line are followed.  This option is assumed if none of the -F, -d, or -l options are specified.
     //bool i; //! Flag for option 'i': Show the file's inode number.
