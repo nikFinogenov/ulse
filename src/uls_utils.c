@@ -1,19 +1,23 @@
 #include <uls.h>
 
-int compare_names(const void *a, const void *b) {
-    return mx_strcmp(*(const char **)a, *(const char **)b);
+int compare_names(const void *a, const void *b, bool rev) {
+    if(!rev) 
+        return mx_strcmp(*(const char **)a, *(const char **)b);
+    return mx_strcmp(*(const char **)b, *(const char **)a);
 }
 
-int compare_file_entries(const void *a, const void *b) {
-    return mx_strcmp(((FileEntry *)a)->name, ((FileEntry *)b)->name);
+int compare_file_entries(const void *a, const void *b, bool rev) {
+    if(!rev)
+        return mx_strcmp(((FileEntry *)a)->name, ((FileEntry *)b)->name);
+    return mx_strcmp(((FileEntry *)b)->name, ((FileEntry *)a)->name);
 }
 
-void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*comparator)(const void *, const void *)) {
+void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*comparator)(const void *, const void *, bool), s_flags_t *flags) {
     for (size_t i = 0; i < num_elements - 1; ++i) {
         for (size_t j = i + 1; j < num_elements; ++j) {
             void *element_i = (char *)base + i * element_size;
             void *element_j = (char *)base + j * element_size;
-            if (comparator(element_i, element_j) > 0) {
+            if (comparator(element_i, element_j, flags->r) > 0) {
                 char temp[element_size];
                 mx_memcpy(temp, element_i, element_size);
                 mx_memcpy(element_i, element_j, element_size);
