@@ -28,13 +28,13 @@
 #define RED_COLOR "\033[31m"
 
 typedef struct s_flags_n{
-    bool one; //DONE Flag for option '1': List one entry per line.
+    bool one;//DONE Flag for option '1': List one entry per line.
     bool C; //DONE Flag for option 'C': Force multi-column output.
     bool m; //DONE comma separated output
     bool l; //DONE Flag for option 'l': Long format, showing detailed file information.
     bool c; // Flag for option 'c': Sort by change time, showing the newest first.
     bool u; // Flag for option 'u': Sort by access time, showing the newest first.
-    bool U; //Use time when file was created for sorting or printing
+    bool U; //? Flag Use time when file was created for sorting or printing
     bool t; // Flag for option 't': Sort by modification time, showing the newest first.
     bool S; // Flag for option 'S': Sort by file size, showing the largest first.
     bool f; // Flag for option 'f': Disable sorting, and list entries in the order they appear.
@@ -42,23 +42,24 @@ typedef struct s_flags_n{
     bool a; //DONE Flag for option 'a': Usually stands for "all", showing hidden files.       
     bool R; //DONE Flag for option 'R': Recursively list subdirectories.
     bool G; //DONE Flag for option 'G': Enable colored output.
-    bool F; // Flag for option 'F': Append a character to entries to indicate their type.
+    bool F; //DONE Flag for option 'F': Append a character to entries to indicate their type.
     bool p; //DONE Flag for option 'p': Add a trailing '/' to directory names.
-    bool r; // Flag for option 'r': Reverse the order of listing.
+    bool r; //DONE Flag for option 'r': Reverse the order of listing.
     bool h; //DONE Flag for option 'h': Human-readable file sizes (e.g., in KB, MB).
-    bool e; // Flag for option 'e': Display the escape sequences for control characters.
+    bool e; //? Flag for option 'e': Display the escape sequences for control characters.
     bool T; // Flag for option 'T': Display full time information.
-    bool at; //DONE Flag for option '@': Extended attribute keys.
+    bool at;//DONE Flag for option '@': Extended attribute keys.
     bool g; //DONE Flag for option 'g': Like 'l', but excludes the owner.
     bool o; //DONE Flag for option 'o': Like 'l', but excludes the group.
-    bool x; // Flag for option 'x': List entries by lines, rather than columns.
+    bool x; //? Flag for option 'x': List entries by lines, rather than columns.
     bool n; // Flag for option 'n': List numeric user and group IDs instead of names.
-    bool q; //Force printing of non-graphic characters in file names as the character ‘?’; this is the default when output is to a terminal.
-    bool H; //Symbolic links on the command line are followed.  This option is assumed if none of the -F, -d, or -l options are specified.
+    
+    bool q; //? Flag Force printing of non-graphic characters in file names as the character ‘?’; this is the default when output is to a terminal.
+    bool H; //? Flag Symbolic links on the command line are followed.  This option is assumed if none of the -F, -d, or -l options are specified.
+    //bool i; //! Flag for option 'i': Show the file's inode number.
+    //bool d; //! Flag for option 'd': List the directory itself, rather than its contents.
 
 
-    // bool i; // Flag for option 'i': Show the file's inode number.
-    // bool d; // Flag for option 'd': List the directory itself, rather than its contents.
     // bool L; //SKIP Flag for option 'L': Follow symbolic links when listing.
     // bool B; //SKIP Flag for option 'B': Disable line wrapping, useful for long filenames.
     // bool s; // Flag for option 's': Show the size of each file in blocks.
@@ -103,13 +104,13 @@ int parse_args(int argc, char *argv[], s_flags_t *flags);
 int parse_dirs(int argc, char *argv[], char ***dirs);
 void print_multicolumn(const char *dirname, s_flags_t *flags);
 void print_perline(const char *dirname, s_flags_t *flags);
-int compare_names(const void *a, const void *b);
-void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*comparator)(const void *, const void *));
+int compare_names(const void *a, const void *b, bool rev);
+void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*comparator)(const void *, const void *, bool), s_flags_t *flags);
 void init_flags(s_flags_t *flags);
 void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_flags_t *flags);
 FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags);
 FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags);
-int compare_file_entries(const void *a, const void *b);
+int compare_file_entries(const void *a, const void *b, bool rev);
 void print_coma(const char *dirname, s_flags_t *flags);
 double custom_round(double value);
 #endif

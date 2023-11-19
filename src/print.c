@@ -33,6 +33,49 @@ static void printstr_formatted(char *str, int wid, bool right) {
         mx_printstr(str);
 }
 
+static bool is_executable(const char *filename) {
+    struct stat st;
+    if (stat(filename, &st) == 0) {
+        return st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH);
+    }
+    return false;
+}
+
+static bool is_fifo(const char *filename) {
+    struct stat st;
+    if (stat(filename, &st) == 0) {
+        return S_ISFIFO(st.st_mode);
+    }
+    return false;
+}
+static bool is_link(const char *filename) {
+    struct stat st;
+    if (lstat(filename, &st) == 0) {
+        return S_ISLNK(st.st_mode);
+    }
+    return false;
+}
+static bool is_socket(const char *filename) {
+    struct stat st;
+    if (stat(filename, &st) == 0) {
+        return S_ISSOCK(st.st_mode);
+    }
+    return false;
+}
+
+static bool is_whiteout(const char *filename) {
+    struct stat st;
+    if (stat(filename, &st) == 0) {
+        return S_ISCHR(st.st_mode);
+    }
+    return false;
+}
+
+static bool is_smth(const char *filename) {
+    return is_dir(filename) || is_executable(filename) 
+    || is_fifo(filename) || is_link(filename) 
+    || is_socket(filename) || is_whiteout(filename);
+}
 void print_multicolumn(const char *dirname, s_flags_t *flags) {
     struct dirent *dir_entry;
     char **files = NULL;
@@ -63,7 +106,7 @@ void print_multicolumn(const char *dirname, s_flags_t *flags) {
     }
 
     if (num_files > 0) {
-        custom_qsort(files, num_files, sizeof(char *), compare_names);
+        custom_qsort(files, num_files, sizeof(char *), compare_names, flags);
 
         int max_name_length = 0;
         for (int i = 0; i < num_files; ++i) {
@@ -96,6 +139,26 @@ void print_multicolumn(const char *dirname, s_flags_t *flags) {
                 int name_len = mx_strlen(files[index]);
                 if(flags->p && is_dir(mx_strjoin(mx_strjoin(dirname, "/"), files[index]))) {
                     mx_printchar('/');
+                    name_len += 1;
+                }
+                else if(flags->F && is_executable(mx_strjoin(mx_strjoin(dirname, "/"), files[index]))) {
+                    mx_printchar('*');
+                    name_len += 1;
+                }
+                else if(flags->F && is_link(mx_strjoin(mx_strjoin(dirname, "/"), files[index]))) {
+                    mx_printchar('@');
+                    name_len += 1;
+                }
+                else if(flags->F && is_socket(mx_strjoin(mx_strjoin(dirname, "/"), files[index]))) {
+                    mx_printchar('=');
+                    name_len += 1;
+                }
+                else if(flags->F && is_whiteout(mx_strjoin(mx_strjoin(dirname, "/"), files[index]))) {
+                    mx_printchar('%');
+                    name_len += 1;
+                }
+                else if(flags->F && is_fifo(mx_strjoin(mx_strjoin(dirname, "/"), files[index]))) {
+                    mx_printchar('|');
                     name_len += 1;
                 }
                 
@@ -185,7 +248,7 @@ void print_perline(const char *dirname, s_flags_t *flags) {
         num_files++;
     }
     if (num_files > 0)
-        custom_qsort(files, num_files, sizeof(char *), compare_names);
+        custom_qsort(files, num_files, sizeof(char *), compare_names, flags);
     for (int i = 0; i < num_files; i++) {
                     if(flags->G) {
                 struct stat sb;
@@ -198,6 +261,21 @@ void print_perline(const char *dirname, s_flags_t *flags) {
                 mx_printstr(files[i]);
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
                 if(flags->p && is_dir(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) mx_printchar('/');
+                else if(flags->F && is_executable(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                    mx_printchar('*');
+                }
+                else if(flags->F && is_link(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                    mx_printchar('@');
+                }
+                else if(flags->F && is_socket(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                    mx_printchar('=');
+                }
+                else if(flags->F && is_whiteout(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                    mx_printchar('%');
+                }
+                else if(flags->F && is_fifo(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                    mx_printchar('|');
+                }
         mx_printchar('\n');
     }
     for (int i = 0; i < num_files; ++i) {
@@ -257,6 +335,21 @@ void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize
                 mx_printstr(file_entries[i].name);
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
                 if(flags->p && is_dir(file_entries[i].path)) mx_printchar('/');
+                else if(flags->F && is_executable(file_entries[i].path)) {
+                    mx_printchar('*');
+                }
+                else if(flags->F && is_link(file_entries[i].path)) {
+                    mx_printchar('@');
+                }
+                else if(flags->F && is_socket(file_entries[i].path)) {
+                    mx_printchar('=');
+                }
+                else if(flags->F && is_whiteout(file_entries[i].path)) {
+                    mx_printchar('%');
+                }
+                else if(flags->F && is_fifo(file_entries[i].path)) {
+                    mx_printchar('|');
+                }
 
     if (file_entries[i].type == 'l') {
         mx_printstr(" -> ");
@@ -355,9 +448,9 @@ void print_coma(const char *dirname, s_flags_t *flags) {
     }
     if (num_files > 0)
         if (!flags->f)
-            custom_qsort(files, num_files, sizeof(char *), compare_names);
+            custom_qsort(files, num_files, sizeof(char *), compare_names, flags);
     for (int i = 0; i < num_files; i++) {
-        if((flags->p && is_dir(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) 
+        if((flags->p || flags->F) && is_smth(mx_strjoin(mx_strjoin(dirname, "/"), files[i])) 
         && ((total_width + mx_strlen(files[i]) + 2 + 1) >= terminal_width)) {
             mx_printchar('\n');
             total_width = 0;
@@ -377,10 +470,26 @@ void print_coma(const char *dirname, s_flags_t *flags) {
                 mx_printstr(files[i]);
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
                 if(flags->p && is_dir(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) mx_printchar('/');
+                else if(flags->F && is_executable(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                    mx_printchar('*');
+                }
+                else if(flags->F && is_link(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                    mx_printchar('@');
+                }
+                else if(flags->F && is_socket(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                    mx_printchar('=');
+                }
+                else if(flags->F && is_whiteout(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                    mx_printchar('%');
+                }
+                else if(flags->F && is_fifo(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                    mx_printchar('|');
+                }
 
         if (i + 1 != num_files) mx_printstr(", ");
         total_width = total_width + mx_strlen(files[i]) + 2;
-        if(flags->p && is_dir(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) total_width++;
+        if((flags->p || flags->F) && is_smth(mx_strjoin(mx_strjoin(dirname, "/"), files[i])) 
+        && ((total_width + mx_strlen(files[i]) + 2 + 1) >= terminal_width)) total_width++;
     }
     mx_printchar('\n');
     for (int i = 0; i < num_files; ++i) {

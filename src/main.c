@@ -31,7 +31,7 @@ void recursive_flag(const char *path, FileEntry *file_entries, int count, s_flag
             mx_printchar('\n');
             int inner_count;
             FileEntry *inner_file_entries = fill_file_entries(sub_path, &inner_count, flags);
-            custom_qsort(inner_file_entries, inner_count, sizeof(FileEntry), compare_file_entries);
+            custom_qsort(inner_file_entries, inner_count, sizeof(FileEntry), compare_file_entries, flags);
             recursive_flag(sub_path, inner_file_entries, inner_count, flags);
             free(inner_file_entries);
         }
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
         dirs[0] = dirname;
     }
     // else if(count_dirs == 1) dirname = dirs[0];
-    custom_qsort(dirs, count_dirs, sizeof(char *), compare_names);
+    custom_qsort(dirs, count_dirs, sizeof(char *), compare_names, &flags);
         for(int i = 0; i < count_dirs; i++) {
             dirname = dirs[i];
             if(count_dirs >=2) {
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
                 return 0;
             }
 
-            custom_qsort(file_entries, count_files, sizeof(FileEntry), compare_file_entries);
+            custom_qsort(file_entries, count_files, sizeof(FileEntry), compare_file_entries, &flags);
             if(flags.R)
                 recursive_flag(dirname, file_entries, count_files, &flags);
             else if (flags.l) {
