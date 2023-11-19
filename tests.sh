@@ -393,6 +393,86 @@ else
     # echo "$diff_res"
 fi
 
+./uls -p > $uls_output
+ls -p > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -p\" OK "
+else
+    echo "\"uls -p\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -lp > $uls_output
+ls -lp > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -lp\" OK "
+else
+    echo "\"uls -lp\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -Cp > $uls_output
+ls -Cp > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -Cp\" OK "
+else
+    echo "\"uls -Cp\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -pC > $uls_output
+ls -pC > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -pC\" OK "
+else
+    echo "\"uls -pC\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -p1 > $uls_output
+ls -p1 > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -p1\" OK "
+else
+    echo "\"uls -p1\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -pm > $uls_output
+ls -pm > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -pm\" OK "
+else
+    echo "\"uls -pm\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -pGm > $uls_output
+ls -pGm > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -p\" OK "
+else
+    echo "\"uls -p\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -Rp > $uls_output
+ls -Rp > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -Rp\" OK "
+else
+    echo "\"uls -Rp\" FALSE"
+    # echo "$diff_res"
+fi
+
 # Очистить временные файлы
 rm $uls_output
 rm $ls_output

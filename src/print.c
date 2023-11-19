@@ -3,8 +3,8 @@
 
 static bool is_dir(const char *filename) {
     struct stat st;
-    if (stat(filename, &st) == 0) {
-        return S_ISDIR(st.st_mode);
+    if (lstat(filename, &st) == 0) {
+        return S_ISDIR(st.st_mode) && !S_ISLNK(st.st_mode);
     }
     return false;
 }
@@ -68,6 +68,7 @@ void print_multicolumn(const char *dirname, s_flags_t *flags) {
         int max_name_length = 0;
         for (int i = 0; i < num_files; ++i) {
             int name_length = mx_strlen(files[i]);
+            if (flags->p) name_length += 1;
             if (name_length > max_name_length) {
                 max_name_length = name_length;
             }
@@ -90,14 +91,14 @@ void print_multicolumn(const char *dirname, s_flags_t *flags) {
                 }   
                 switch_strcolor(sb);
             }
-                if (flags->p && is_dir(files[index])) {
-                    mx_printstr(mx_strcat(files[index],"/"));
-                } else {
-                    mx_printstr(files[index]);  
-                }
-
+                mx_printstr(files[index]);
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
                 int name_len = mx_strlen(files[index]);
+                if(flags->p && is_dir(mx_strjoin(mx_strjoin(dirname, "/"), files[index]))) {
+                    mx_printchar('/');
+                    name_len += 1;
+                }
+                
                 index = index + rows;
                 if (index >= num_files)
                     break;
@@ -186,7 +187,6 @@ void print_perline(const char *dirname, s_flags_t *flags) {
     if (num_files > 0)
         custom_qsort(files, num_files, sizeof(char *), compare_names);
     for (int i = 0; i < num_files; i++) {
-        // mx_printstr(files[i]);
                     if(flags->G) {
                 struct stat sb;
                 if (lstat(mx_strjoin(mx_strjoin(dirname, "/"), files[i]), &sb) == -1) {
@@ -195,13 +195,9 @@ void print_perline(const char *dirname, s_flags_t *flags) {
                 }   
                 switch_strcolor(sb);
             }
-                if (flags->p && is_dir(files[i])) {
-                    mx_printstr(mx_strcat(files[i],"/"));
-                } else {
-                    mx_printstr(files[i]);  
-                }
-
+                mx_printstr(files[i]);
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
+                if(flags->p && is_dir(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) mx_printchar('/');
         mx_printchar('\n');
     }
     for (int i = 0; i < num_files; ++i) {
@@ -250,7 +246,6 @@ void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize
     mx_printchar(' ');
     mx_printstr(file_entries[i].modification_time);
     mx_printchar(' ');
-    // mx_printstr(file_entries[i].name);
                         if(flags->G) {
                 struct stat sb;
                 if (lstat(file_entries[i].path, &sb) == -1) {
@@ -259,19 +254,14 @@ void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize
                 }   
                 switch_strcolor(sb);
             }
-                if (flags->p && is_dir(file_entries[i].name)) {
-                    mx_printstr(mx_strcat(file_entries[i].name,"/"));
-                } else {
-                    mx_printstr(file_entries[i].name);  
-                }
+                mx_printstr(file_entries[i].name);
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
+                if(flags->p && is_dir(file_entries[i].path)) mx_printchar('/');
 
     if (file_entries[i].type == 'l') {
         mx_printstr(" -> ");
         mx_printstr(file_entries[i].symlink);
     }
-    // mx_printint(mxsize.max_h_size_len);
-    //     mx_printchar(' ');
     mx_printchar('\n');
     if(flags->at && file_entries[i].xattr_keys != NULL) {
         print_xattr(&file_entries[i], flags);
@@ -367,7 +357,13 @@ void print_coma(const char *dirname, s_flags_t *flags) {
         if (!flags->f)
             custom_qsort(files, num_files, sizeof(char *), compare_names);
     for (int i = 0; i < num_files; i++) {
-        if ((total_width + mx_strlen(files[i]) + 2) >= terminal_width) {
+        if((flags->p && is_dir(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) 
+        && ((total_width + mx_strlen(files[i]) + 2 + 1) >= terminal_width)) {
+            mx_printchar('\n');
+            total_width = 0;
+        }
+        else if ((total_width + mx_strlen(files[i]) + 2) >= terminal_width) {
+            // mx_printchar('Q');
             mx_printchar('\n');
             total_width = 0;
         }
@@ -378,14 +374,13 @@ void print_coma(const char *dirname, s_flags_t *flags) {
                 }   
                 switch_strcolor(sb);
             }
-                if (flags->p && is_dir(files[i])) {
-                    mx_printstr(mx_strcat(files[i],"/"));
-                } else {
-                    mx_printstr(files[i]);  
-                }
+                mx_printstr(files[i]);
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
+                if(flags->p && is_dir(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) mx_printchar('/');
+
         if (i + 1 != num_files) mx_printstr(", ");
         total_width = total_width + mx_strlen(files[i]) + 2;
+        if(flags->p && is_dir(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) total_width++;
     }
     mx_printchar('\n');
     for (int i = 0; i < num_files; ++i) {
