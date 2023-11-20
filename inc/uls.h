@@ -32,12 +32,12 @@ typedef struct s_flags_n{
     bool C; //DONE Flag for option 'C': Force multi-column output.
     bool m; //DONE comma separated output
     bool l; //DONE Flag for option 'l': Long format, showing detailed file information.
-    bool c; // Flag for option 'c': Sort by change time, showing the newest first.
-    bool u; // Flag for option 'u': Sort by access time, showing the newest first.
-    bool U; //? Flag Use time when file was created for sorting or printing
-    bool t; // Flag for option 't': Sort by modification time, showing the newest first.
-    bool S; // Flag for option 'S': Sort by file size, showing the largest first.
-    bool f; // Flag for option 'f': Disable sorting, and list entries in the order they appear.
+    bool c; //DONE Flag for option 'c': Sort by change time, showing the newest first.
+    bool u; //DONE Flag for option 'u': Sort by access time, showing the newest first.
+    bool U; //DONE Flag Use time when file was created for sorting or printing
+    bool t; //DONE Flag for option 't': Sort by modification time, showing the newest first.
+    bool S; //DONE Flag for option 'S': Sort by file size, showing the largest first.
+    bool f; //DONE Flag for option 'f': Disable sorting, and list entries in the order they appear.
     bool A; //DONE Flag for option 'A': Lists all entries except for '.' and '..'.
     bool a; //DONE Flag for option 'a': Usually stands for "all", showing hidden files.       
     bool R; //DONE Flag for option 'R': Recursively list subdirectories.
@@ -88,7 +88,8 @@ typedef struct {
     char group[256];
     long size;
     char human_size[256];
-    char modification_time[20];
+    char date_time[20];
+    struct timespec cmptime;
     char symlink[1024];
     char **xattr_keys;
 } FileEntry;
@@ -104,8 +105,8 @@ typedef struct {
 void switch_strcolor(struct stat sb);
 int parse_args(int argc, char *argv[], s_flags_t *flags);
 int parse_dirs(int argc, char *argv[], char ***dirs);
-void print_multicolumn(const char *dirname, s_flags_t *flags);
-void print_perline(const char *dirname, s_flags_t *flags);
+void print_multicolumn(FileEntry *file_entries, int count, s_flags_t *flags);
+void print_perline(FileEntry *file_entries, int count, s_flags_t *flags);
 int compare_names(const void *a, const void *b, bool rev);
 void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*comparator)(const void *, const void *, bool), s_flags_t *flags);
 void init_flags(s_flags_t *flags);
@@ -114,7 +115,7 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags);
 FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags);
 int compare_file_entries_name(const void *a, const void *b, bool rev);
 int compare_file_entries_size(const void *a, const void *b, bool rev);
-int compare_file_entries_modification_time(const void *a, const void *b, bool rev);
-void print_coma(const char *dirname, s_flags_t *flags);
+int compare_file_entries_date_time(const void *a, const void *b, bool rev);
+void print_coma(FileEntry *file_entries, int count, s_flags_t *flags);
 double custom_round(double value);
 #endif

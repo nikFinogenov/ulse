@@ -12,15 +12,32 @@ int compare_file_entries_name(const void *a, const void *b, bool rev) {
     return mx_strcmp(((FileEntry *)b)->name, ((FileEntry *)a)->name);
 }
 
-int compare_file_entries_modification_time(const void *a, const void *b, bool rev) {
-    if(!rev)
-        return mx_strcmp(((FileEntry *)a)->modification_time, ((FileEntry *)b)->modification_time);
-    return mx_strcmp(((FileEntry *)b)->modification_time, ((FileEntry *)a)->modification_time);
+int compare_file_entries_date_time(const void *a, const void *b, bool rev) {
+    if(!rev) {
+        if(((FileEntry *)b)->cmptime.tv_sec - ((FileEntry *)a)->cmptime.tv_sec == 0) {
+            if(((FileEntry *)b)->cmptime.tv_nsec - ((FileEntry *)a)->cmptime.tv_nsec == 0)
+                return mx_strcmp(((FileEntry *)a)->name, ((FileEntry *)b)->name);
+            return ((FileEntry *)b)->cmptime.tv_nsec - ((FileEntry *)a)->cmptime.tv_nsec;
+        }
+        return ((FileEntry *)b)->cmptime.tv_sec - ((FileEntry *)a)->cmptime.tv_sec;
+    }
+    else {
+        if(((FileEntry *)a)->cmptime.tv_sec - ((FileEntry *)b)->cmptime.tv_sec == 0) {
+            if(((FileEntry *)a)->cmptime.tv_nsec - ((FileEntry *)b)->cmptime.tv_nsec == 0)
+                return mx_strcmp(((FileEntry *)b)->name, ((FileEntry *)a)->name);
+            return ((FileEntry *)a)->cmptime.tv_nsec - ((FileEntry *)b)->cmptime.tv_nsec;
+        }
+        return ((FileEntry *)a)->cmptime.tv_sec - ((FileEntry *)b)->cmptime.tv_sec;
+    }
 }
 
 int compare_file_entries_size(const void *a, const void *b, bool rev) {
-    if(!rev)
+    if(!rev) {
+        if(((FileEntry *)b)->size - ((FileEntry *)a)->size == 0) return mx_strcmp(((FileEntry *)a)->name, ((FileEntry *)b)->name);
         return ((FileEntry *)b)->size - ((FileEntry *)a)->size;
+    }
+    else 
+        if(((FileEntry *)b)->size - ((FileEntry *)a)->size == 0) return mx_strcmp(((FileEntry *)b)->name, ((FileEntry *)a)->name);
     return ((FileEntry *)a)->size - ((FileEntry *)b)->size;
 }
 
@@ -37,6 +54,35 @@ void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*co
             }
         }
     }
+}
+char *format_size(long size) {
+    char *suffix[] = {"B", "K", "M", "G", "T"};
+    int i;
+    double d_size = (double)size;
+
+    for (i = 0; i < 6; i++) {
+        if (d_size < 1000) {
+            break;
+        }
+        d_size /= 1024;
+    }
+    double size_r = custom_round(d_size * 10) / 10;
+    char *result = (char *)malloc(20);
+    if (size_r >= 10 || i == 0) {
+        char *str = mx_lltoa(custom_round(d_size));
+        result = mx_strjoin(result, str);
+        free(str);
+    }
+    else {
+        char *str = mx_lltoa(size_r);
+        result = mx_strjoin(mx_strjoin(result, str), ".");
+        free(str);
+        str = mx_lltoa((long long)(size_r * 10) % 10);
+        result = mx_strjoin(result, str);
+        free(str);
+    }
+    result = mx_strjoin(result, suffix[i]);
+    return result;
 }
 
 void init_flags(s_flags_t *flags) {
@@ -119,53 +165,64 @@ FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags) {
     struct group *gr = getgrgid(sb.st_gid);
     mx_strcpy(file_entry->owner, pw->pw_name);
     mx_strcpy(file_entry->group, gr->gr_name);
-    file_entry->size = sb.st_size;
+    if (flags->h) {
+        char *new_size = NULL;
+        new_size = mx_strjoin(new_size, format_size(sb.st_size));
+        mx_strcpy(file_entry->human_size, new_size);
+    }
+    else {
+        file_entry->size = sb.st_size;
+    }
 
     struct timespec timesp = sb.st_mtimespec;
+    if(flags->c) timesp = sb.st_ctimespec;
+    if(flags->u) timesp = sb.st_atimespec;
+    if(flags->U) timesp = sb.st_birthtimespec;
+    if(flags->t) file_entry->cmptime = timesp;
     char *str = ctime(&timesp.tv_sec);
     char **arr = mx_strsplit(str, ' ');
     time_t now = time(NULL);
     time_t six_months_sec = (365 / 2) * 24 * 60 * 60;
     arr[4][4] = '\0';
-    char *new_modification_time = NULL;
+    char *new_date_time = NULL;
     if (timesp.tv_sec + six_months_sec <= now || timesp.tv_sec >= now + six_months_sec) {
-        new_modification_time = mx_strjoin(new_modification_time, arr[1]);
-        new_modification_time = mx_strjoin(new_modification_time, " ");
+        new_date_time = mx_strjoin(new_date_time, arr[1]);
+        new_date_time = mx_strjoin(new_date_time, " ");
         int spaces = 2 - mx_strlen(arr[2]);
         for (int i = 0; i < spaces; i++) {
-            new_modification_time = mx_strjoin(new_modification_time, " ");
+            new_date_time = mx_strjoin(new_date_time, " ");
         }
-        new_modification_time = mx_strjoin(new_modification_time, arr[2]);
-        new_modification_time = mx_strjoin(new_modification_time, "  ");
-        new_modification_time = mx_strjoin(new_modification_time, arr[4]);
+        new_date_time = mx_strjoin(new_date_time, arr[2]);
+        new_date_time = mx_strjoin(new_date_time, "  ");
+        new_date_time = mx_strjoin(new_date_time, arr[4]);
     }
     else {
-        new_modification_time = mx_strjoin(new_modification_time, arr[1]);
-        new_modification_time = mx_strjoin(new_modification_time, " ");
+        new_date_time = mx_strjoin(new_date_time, arr[1]);
+        new_date_time = mx_strjoin(new_date_time, " ");
 
         int spaces = 2 - mx_strlen(arr[2]);
         for (int i = 0; i < spaces; i++) {
-            new_modification_time = mx_strjoin(new_modification_time, " ");
+            new_date_time = mx_strjoin(new_date_time, " ");
         }
-        new_modification_time = mx_strjoin(new_modification_time, arr[2]);
+        new_date_time = mx_strjoin(new_date_time, arr[2]);
 
-        new_modification_time = mx_strjoin(new_modification_time, " ");
+        new_date_time = mx_strjoin(new_date_time, " ");
         char **arr_time = mx_strsplit(arr[3], ':');
-        new_modification_time = mx_strjoin(new_modification_time, arr_time[0]);
-        new_modification_time = mx_strjoin(new_modification_time, ":");
-        new_modification_time = mx_strjoin(new_modification_time, arr_time[1]);
+        new_date_time = mx_strjoin(new_date_time, arr_time[0]);
+        new_date_time = mx_strjoin(new_date_time, ":");
+        new_date_time = mx_strjoin(new_date_time, arr_time[1]);
         mx_del_strarr(&arr_time);
     }
 
     mx_del_strarr(&arr);
-    if (strlen(new_modification_time) < sizeof(file_entry->modification_time)) {
-        strcpy(file_entry->modification_time, new_modification_time);
+    if (strlen(new_date_time) < sizeof(file_entry->date_time)) {
+        strcpy(file_entry->date_time, new_date_time);
     }
     else {
         perror("Bad time");
         exit(1);
     }
-    free(new_modification_time);
+    free(new_date_time);
 
     if (S_ISLNK(sb.st_mode)) {
         ssize_t len = readlink(linkname, file_entry->symlink, sizeof(file_entry->symlink) - 1);
@@ -226,51 +283,6 @@ switch (sb.st_mode & S_IFMT) {
 double custom_round(double value) {
     double result = value + 0.5;
     return (long)result;
-}
-// char *mx_int_to_str(int num) {
-//     // Определение максимальной длины строки для числа (10 символов на число и 1 символ на знак)
-//     int max_length = 12;
-//     char *result = (char *)malloc(max_length * sizeof(char));
-
-//     // Проверка на успешное выделение памяти
-//     if (result == NULL) {
-//         fprintf(stderr, "Ошибка выделения памяти\n");
-//         exit(EXIT_FAILURE);
-//     }
-
-//     // Использование функции sprintf для преобразования числа в строку
-//     sprintf(result, "%d", num);
-
-//     return result;
-// }
-char *format_size(long size) {
-    char *suffix[] = {"B", "K", "M", "G", "T"};
-    int i;
-    double d_size = (double)size;
-
-    for (i = 0; i < 6; i++) {
-        if (d_size < 1000) {
-            break;
-        }
-        d_size /= 1024;
-    }
-    double size_r = custom_round(d_size * 10) / 10;
-    char *result = (char *)malloc(20);
-    if (size_r >= 10 || i == 0) {
-        char *str = mx_lltoa(custom_round(d_size));
-        result = mx_strjoin(result, str);
-        free(str);
-    }
-    else {
-        char *str = mx_lltoa(size_r);
-        result = mx_strjoin(mx_strjoin(result, str), ".");
-        free(str);
-        str = mx_lltoa((long long)(size_r * 10) % 10);
-        result = mx_strjoin(result, str);
-        free(str);
-    }
-    result = mx_strjoin(result, suffix[i]);
-    return result;
 }
 
 FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) {
@@ -379,50 +391,54 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
         }
 
         struct timespec timesp = sb.st_mtimespec;
+        if(flags->c) timesp = sb.st_ctimespec;
+        if(flags->u) timesp = sb.st_atimespec;
+        if(flags->U) timesp = sb.st_birthtimespec;
+        if(flags->t) file_entry->cmptime = timesp;
         char *str = ctime(&timesp.tv_sec);
         char **arr = mx_strsplit(str, ' ');
         time_t now = time(NULL);
         time_t six_months_sec = (365 / 2) * 24 * 60 * 60;
         arr[4][4] = '\0';
-        char *new_modification_time = NULL;
+        char *new_date_time = NULL;
         if (timesp.tv_sec + six_months_sec <= now || timesp.tv_sec >= now + six_months_sec) {
-            new_modification_time = mx_strjoin(new_modification_time, arr[1]);
-            new_modification_time = mx_strjoin(new_modification_time, " ");
+            new_date_time = mx_strjoin(new_date_time, arr[1]);
+            new_date_time = mx_strjoin(new_date_time, " ");
             int spaces = 2 - mx_strlen(arr[2]);
             for (int i = 0; i < spaces; i++) {
-                new_modification_time = mx_strjoin(new_modification_time, " ");
+                new_date_time = mx_strjoin(new_date_time, " ");
             }
-            new_modification_time = mx_strjoin(new_modification_time, arr[2]);
-            new_modification_time = mx_strjoin(new_modification_time, "  ");
-            new_modification_time = mx_strjoin(new_modification_time, arr[4]);
+            new_date_time = mx_strjoin(new_date_time, arr[2]);
+            new_date_time = mx_strjoin(new_date_time, "  ");
+            new_date_time = mx_strjoin(new_date_time, arr[4]);
         }
         else {
-            new_modification_time = mx_strjoin(new_modification_time, arr[1]);
-            new_modification_time = mx_strjoin(new_modification_time, " ");
+            new_date_time = mx_strjoin(new_date_time, arr[1]);
+            new_date_time = mx_strjoin(new_date_time, " ");
 
             int spaces = 2 - mx_strlen(arr[2]);
             for (int i = 0; i < spaces; i++) {
-                new_modification_time = mx_strjoin(new_modification_time, " ");
+                new_date_time = mx_strjoin(new_date_time, " ");
             }
-            new_modification_time = mx_strjoin(new_modification_time, arr[2]);
+            new_date_time = mx_strjoin(new_date_time, arr[2]);
 
-            new_modification_time = mx_strjoin(new_modification_time, " ");
+            new_date_time = mx_strjoin(new_date_time, " ");
             char **arr_time = mx_strsplit(arr[3], ':');
-            new_modification_time = mx_strjoin(new_modification_time, arr_time[0]);
-            new_modification_time = mx_strjoin(new_modification_time, ":");
-            new_modification_time = mx_strjoin(new_modification_time, arr_time[1]);
+            new_date_time = mx_strjoin(new_date_time, arr_time[0]);
+            new_date_time = mx_strjoin(new_date_time, ":");
+            new_date_time = mx_strjoin(new_date_time, arr_time[1]);
             mx_del_strarr(&arr_time);
         }
 
         mx_del_strarr(&arr);
-        if (strlen(new_modification_time) < sizeof(file_entry->modification_time)) {
-            strcpy(file_entry->modification_time, new_modification_time);
+        if (strlen(new_date_time) < sizeof(file_entry->date_time)) {
+            strcpy(file_entry->date_time, new_date_time);
         }
         else {
             perror("Bad time");
             exit(1);
         }
-        free(new_modification_time);
+        free(new_date_time);
 
         if (S_ISLNK(sb.st_mode)) {
             ssize_t len = readlink(file_path, file_entry->symlink, sizeof(file_entry->symlink) - 1);

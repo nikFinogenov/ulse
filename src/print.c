@@ -35,8 +35,8 @@ static void printstr_formatted(char *str, int wid, bool right) {
 
 static bool is_executable(const char *filename) {
     struct stat st;
-    if (stat(filename, &st) == 0) {
-        return st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH);
+    if (lstat(filename, &st) == 0) {
+        return st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH) && !S_ISLNK(st.st_mode);
     }
     return false;
 }
@@ -44,7 +44,7 @@ static bool is_executable(const char *filename) {
 static bool is_fifo(const char *filename) {
     struct stat st;
     if (stat(filename, &st) == 0) {
-        return S_ISFIFO(st.st_mode);
+        return S_ISFIFO(st.st_mode) && !S_ISLNK(st.st_mode);
     }
     return false;
 }
@@ -58,7 +58,7 @@ static bool is_link(const char *filename) {
 static bool is_socket(const char *filename) {
     struct stat st;
     if (stat(filename, &st) == 0) {
-        return S_ISSOCK(st.st_mode);
+        return S_ISSOCK(st.st_mode)&& !S_ISLNK(st.st_mode);
     }
     return false;
 }
@@ -66,7 +66,7 @@ static bool is_socket(const char *filename) {
 static bool is_whiteout(const char *filename) {
     struct stat st;
     if (stat(filename, &st) == 0) {
-        return S_ISCHR(st.st_mode);
+        return S_ISCHR(st.st_mode) && !S_ISLNK(st.st_mode);
     }
     return false;
 }
@@ -76,28 +76,7 @@ static bool is_smth(const char *filename) {
     || is_fifo(filename) || is_link(filename) 
     || is_socket(filename) || is_whiteout(filename);
 }
-void print_multicolumn(const char *dirname, s_flags_t *flags) {
-    struct dirent *dir_entry;
-    char **files = NULL;
-    int num_files = 0;
-
-    DIR *dir = opendir(dirname);
-    if (dir == NULL) {
-        mx_printerr("opendir");
-        exit(1);
-    }
-
-    while ((dir_entry = readdir(dir)) != NULL) {
-        if ((mx_strcmp(dir_entry->d_name, ".") == 0 || mx_strcmp(dir_entry->d_name, "..") == 0) && flags->A) continue;
-        if (dir_entry->d_name[0] == '.' && !flags->a) continue;
-            
-        files = mx_realloc(files, (num_files + 1) * sizeof(char *));
-        files[num_files] = mx_strdup(dir_entry->d_name);
-        num_files++;
-    }
-
-    closedir(dir);
-
+void print_multicolumn(FileEntry *file_entries, int count, s_flags_t *flags) {
     int terminal_width = 80;
     if (isatty(1)) {
         struct winsize w;
@@ -105,12 +84,9 @@ void print_multicolumn(const char *dirname, s_flags_t *flags) {
         terminal_width = w.ws_col;
     }
 
-    if (num_files > 0) {
-        custom_qsort(files, num_files, sizeof(char *), compare_names, flags);
-
         int max_name_length = 0;
-        for (int i = 0; i < num_files; ++i) {
-            int name_length = mx_strlen(files[i]);
+        for (int i = 0; i < count; ++i) {
+            int name_length = mx_strlen(file_entries[i].name);
             if (flags->p) name_length += 1;
             if (name_length > max_name_length) {
                 max_name_length = name_length;
@@ -121,49 +97,49 @@ void print_multicolumn(const char *dirname, s_flags_t *flags) {
         int width = (max_name_length + tab) & ~(tab - 1);
         int num_columns = terminal_width / width;
         int index = 0;
-        int rows = (num_files + num_columns - 1) / num_columns;
+        int rows = (count + num_columns - 1) / num_columns;
         for (int i = 0; i < rows; ++i) {
             index = i;
             for (int j = 0; j < num_columns; j++) {
             if(flags->G) {
                 struct stat sb;
-                // printf("%d\n", index);
-                if (lstat(mx_strjoin(mx_strjoin(dirname, "/"), files[index]), &sb) == -1) {
+                
+                if (lstat(file_entries[index].path, &sb) == -1) {
                     perror("Cannot get file information");
                     continue;
                 }   
                 switch_strcolor(sb);
             }
-                mx_printstr(files[index]);
+                mx_printstr(file_entries[index].name);
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
-                int name_len = mx_strlen(files[index]);
-                if(flags->p && is_dir(mx_strjoin(mx_strjoin(dirname, "/"), files[index]))) {
+                int name_len = mx_strlen(file_entries[index].name);
+                if(flags->p && is_dir(file_entries[index].path)) {
                     mx_printchar('/');
                     name_len += 1;
                 }
-                else if(flags->F && is_executable(mx_strjoin(mx_strjoin(dirname, "/"), files[index]))) {
+                else if(flags->F && is_executable(file_entries[index].path)) {
                     mx_printchar('*');
                     name_len += 1;
                 }
-                else if(flags->F && is_link(mx_strjoin(mx_strjoin(dirname, "/"), files[index]))) {
+                else if(flags->F && is_link(file_entries[index].path)) {
                     mx_printchar('@');
                     name_len += 1;
                 }
-                else if(flags->F && is_socket(mx_strjoin(mx_strjoin(dirname, "/"), files[index]))) {
+                else if(flags->F && is_socket(file_entries[index].path)) {
                     mx_printchar('=');
                     name_len += 1;
                 }
-                else if(flags->F && is_whiteout(mx_strjoin(mx_strjoin(dirname, "/"), files[index]))) {
+                else if(flags->F && is_whiteout(file_entries[index].path)) {
                     mx_printchar('%');
                     name_len += 1;
                 }
-                else if(flags->F && is_fifo(mx_strjoin(mx_strjoin(dirname, "/"), files[index]))) {
+                else if(flags->F && is_fifo(file_entries[index].path)) {
                     mx_printchar('|');
                     name_len += 1;
                 }
                 
                 index = index + rows;
-                if (index >= num_files)
+                if (index >= count)
                     break;
                 int tabs = (width - name_len + tab - 1) / tab;
                 for (int i = 0; i < tabs; i++) {
@@ -175,12 +151,6 @@ void print_multicolumn(const char *dirname, s_flags_t *flags) {
             }
             mx_printchar('\n');
         }
-
-        for (int i = 0; i < num_files; ++i) {
-            free(files[i]);
-        }
-        free(files);
-    }
 }
 void print_xattr(const FileEntry *file_entry, s_flags_t *flags) {
     for (char **ptr = file_entry->xattr_keys; *ptr != NULL; ptr++) {
@@ -230,59 +200,41 @@ void print_xattr(const FileEntry *file_entry, s_flags_t *flags) {
     }
 }
 
-void print_perline(const char *dirname, s_flags_t *flags) {
-    struct dirent *dir_entry;
-    char **files = NULL;
-    int num_files = 0;
-
-    DIR *dir = opendir(dirname);
-    if (dir == NULL) {
-        mx_printerr("opendir");
-        exit(1);
-    }
-    while ((dir_entry = readdir(dir)) != NULL) {
-        if ((mx_strcmp(dir_entry->d_name, ".") == 0 || mx_strcmp(dir_entry->d_name, "..") == 0) && flags->A) continue;
-        if (dir_entry->d_name[0] == '.' && !flags->a) continue;
-        files = mx_realloc(files, (num_files + 1) * sizeof(char *));
-        files[num_files] = mx_strdup(dir_entry->d_name);
-        num_files++;
-    }
-    if (num_files > 0)
-        custom_qsort(files, num_files, sizeof(char *), compare_names, flags);
-    for (int i = 0; i < num_files; i++) {
+void print_perline(FileEntry *file_entries, int count, s_flags_t *flags) {
+    for (int i = 0; i < count; i++) {
                     if(flags->G) {
                 struct stat sb;
-                if (lstat(mx_strjoin(mx_strjoin(dirname, "/"), files[i]), &sb) == -1) {
+                if (lstat(file_entries[i].path, &sb) == -1) {
                     perror("Cannot get file information");
                     continue;
                 }   
                 switch_strcolor(sb);
             }
-                mx_printstr(files[i]);
+                mx_printstr(file_entries[i].name);
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
-                if(flags->p && is_dir(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) mx_printchar('/');
-                else if(flags->F && is_executable(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                if(flags->p && is_dir(file_entries[i].path)) mx_printchar('/');
+                else if(flags->F && is_executable(file_entries[i].path)) {
                     mx_printchar('*');
                 }
-                else if(flags->F && is_link(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                else if(flags->F && is_link(file_entries[i].path)) {
                     mx_printchar('@');
                 }
-                else if(flags->F && is_socket(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                else if(flags->F && is_socket(file_entries[i].path)) {
                     mx_printchar('=');
                 }
-                else if(flags->F && is_whiteout(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                else if(flags->F && is_whiteout(file_entries[i].path)) {
                     mx_printchar('%');
                 }
-                else if(flags->F && is_fifo(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                else if(flags->F && is_fifo(file_entries[i].path)) {
                     mx_printchar('|');
                 }
         mx_printchar('\n');
     }
-    for (int i = 0; i < num_files; ++i) {
-        free(files[i]);
-    }
-    free(files);
-    closedir(dir);
+    // for (int i = 0; i < num_files; ++i) {
+    //     free(files[i]);
+    // }
+    // free(files);
+    // closedir(dir);
 }
 
 void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize, s_flags_t *flags) {
@@ -322,7 +274,7 @@ void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize
     }
 
     mx_printchar(' ');
-    mx_printstr(file_entries[i].modification_time);
+    mx_printstr(file_entries[i].date_time);
     mx_printchar(' ');
                         if(flags->G) {
                 struct stat sb;
@@ -362,14 +314,8 @@ void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize
 }
 
 void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_flags_t *flags) {
-    // while (flags)
-    // {
-    //     break;
-    // }
     int total_blocks = 0;
     struct stat sb;
-    char file_path[1024];
-    // printf("%s\n", dirname);
     if (lstat(dirname, &sb) == -1) {
         perror("Cannot get directory information");
         exit(1);
@@ -378,10 +324,7 @@ void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_f
         mx_printstr("total ");
 
         for (int i = 0; i < count; ++i) {
-            // if (file_entries[i].name[0] == '.' && !flags->a)
-            //     continue;
-            mx_strcpy(file_path, mx_strjoin(mx_strjoin(dirname, "/"), file_entries[i].name));
-            if (lstat(file_path, &sb) == -1) {
+            if (lstat(file_entries[i].path, &sb) == -1) {
                 perror("Cannot get file information");
                 continue;
             }
@@ -422,16 +365,7 @@ void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_f
     }
 }
 
-void print_coma(const char *dirname, s_flags_t *flags) {
-    struct dirent *dir_entry;
-    char **files = NULL;
-    int num_files = 0;
-
-    DIR *dir = opendir(dirname);
-    if (dir == NULL) {
-        mx_printerr("opendir");
-        exit(1);
-    }
+void print_coma(FileEntry *file_entries, int count, s_flags_t *flags) {
     int terminal_width = 80;
     if (isatty(1)) {
         struct winsize w;
@@ -439,62 +373,48 @@ void print_coma(const char *dirname, s_flags_t *flags) {
         terminal_width = w.ws_col;
     }
     int total_width = 0;
-    while ((dir_entry = readdir(dir)) != NULL) {
-        if ((mx_strcmp(dir_entry->d_name, ".") == 0 || mx_strcmp(dir_entry->d_name, "..") == 0) && flags->A) continue;
-        if (dir_entry->d_name[0] == '.' && !flags->a) continue;
-        files = mx_realloc(files, (num_files + 1) * sizeof(char *));
-        files[num_files] = mx_strdup(dir_entry->d_name);
-        num_files++;
-    }
-    if (num_files > 0)
-        if (!flags->f)
-            custom_qsort(files, num_files, sizeof(char *), compare_names, flags);
-    for (int i = 0; i < num_files; i++) {
-        if((flags->p || flags->F) && is_smth(mx_strjoin(mx_strjoin(dirname, "/"), files[i])) 
-        && ((total_width + mx_strlen(files[i]) + 2 + 1) >= terminal_width)) {
+    for (int i = 0; i < count; i++) {
+        if((i + 1 == count) && (flags->p || flags->F) && is_smth(file_entries[i].path) 
+        && ((total_width + mx_strlen(file_entries[i].name) + 1) <= terminal_width)){}
+        else if((flags->p || flags->F) && is_smth(file_entries[i].path) 
+        && ((total_width + mx_strlen(file_entries[i].name) + 2 + 1) > terminal_width)) {
             mx_printchar('\n');
             total_width = 0;
         }
-        else if ((total_width + mx_strlen(files[i]) + 2) >= terminal_width) {
-            // mx_printchar('Q');
+        else if((i + 1 == count) && ((total_width + mx_strlen(file_entries[i].name)) <= terminal_width)){}
+        else if ((total_width + mx_strlen(file_entries[i].name) + 2) >= terminal_width) {
             mx_printchar('\n');
             total_width = 0;
         }
             if(flags->G) {
                 struct stat sb;
-                if (lstat(mx_strjoin(mx_strjoin(dirname, "/"), files[i]), &sb) == -1) {
+                if (lstat(file_entries[i].path, &sb) == -1) {
                     perror("Cannot get file information");
                 }   
                 switch_strcolor(sb);
             }
-                mx_printstr(files[i]);
+                mx_printstr(file_entries[i].name);
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
-                if(flags->p && is_dir(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) mx_printchar('/');
-                else if(flags->F && is_executable(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                if(flags->p && is_dir(file_entries[i].path)) mx_printchar('/');
+                else if(flags->F && is_executable(file_entries[i].path)) {
                     mx_printchar('*');
                 }
-                else if(flags->F && is_link(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                else if(flags->F && is_link(file_entries[i].path)) {
                     mx_printchar('@');
                 }
-                else if(flags->F && is_socket(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                else if(flags->F && is_socket(file_entries[i].path)) {
                     mx_printchar('=');
                 }
-                else if(flags->F && is_whiteout(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                else if(flags->F && is_whiteout(file_entries[i].path)) {
                     mx_printchar('%');
                 }
-                else if(flags->F && is_fifo(mx_strjoin(mx_strjoin(dirname, "/"), files[i]))) {
+                else if(flags->F && is_fifo(file_entries[i].path)) {
                     mx_printchar('|');
                 }
 
-        if (i + 1 != num_files) mx_printstr(", ");
-        total_width = total_width + mx_strlen(files[i]) + 2;
-        if((flags->p || flags->F) && is_smth(mx_strjoin(mx_strjoin(dirname, "/"), files[i])) 
-        && ((total_width + mx_strlen(files[i]) + 2 + 1) >= terminal_width)) total_width++;
+        if (i + 1 != count) mx_printstr(", ");
+        total_width = total_width + mx_strlen(file_entries[i].name) + 2;
+        if((flags->p || flags->F) && is_smth(file_entries[i].path)) total_width++;
     }
     mx_printchar('\n');
-    for (int i = 0; i < num_files; ++i) {
-        free(files[i]);
-    }
-    free(files);
-    closedir(dir);
 }
