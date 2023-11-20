@@ -22,19 +22,24 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                         flags->m = false;
                         break;
                     case 'r':
-                        flags->r = true;
+                        if(!flags->f) flags->r = true;
                         break;
                     case 'R':
                         flags->R = true;
                         break;
                     case 't':
-                        flags->t = true;
+                        if(!flags->f) flags->t = true;
+                        flags->S = false;
                         break;
                     case 'u':
                         flags->u = true;
+                        flags->c = false;
+                        flags->U = false;
                         break;
                     case 'c':
                         flags->c = true;
+                        flags->U = false;
+                        flags->u = false;
                         break;
                     case 'G':
                         flags->G = true;
@@ -46,7 +51,8 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                         flags->e = true;
                         break;
                     case 'S':
-                        flags->S = true;
+                        if(!flags->f) flags->S = true;
+                        flags->t = false;
                         break;
                     case 'T':
                         flags->T = true;
@@ -60,6 +66,10 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                         break;
                     case 'f':
                         flags->f = true;
+                        flags->a = true;
+                        flags->S = false;
+                        flags->t = false;
+                        flags->r = false;
                         break;
                     case 'n':
                         flags->n = true;
@@ -97,6 +107,8 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                         break;
                     case 'U':
                         flags->U = true;
+                        flags->u = false;
+                        flags->c = false;
                         break;
                     case 'q':
                         flags->q = true;

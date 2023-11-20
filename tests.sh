@@ -473,6 +473,338 @@ else
     # echo "$diff_res"
 fi
 
+./uls -Rpm > $uls_output
+ls -Rpm > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -Rpm\" OK "
+else
+    echo "\"uls -Rpm\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -F > $uls_output
+ls -F > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -F\" OK "
+else
+    echo "\"uls -F\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -Fl > $uls_output
+ls -Fl > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -Fl\" OK "
+else
+    echo "\"uls -Fl\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -RF > $uls_output
+ls -RF > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -RF\" OK "
+else
+    echo "\"uls -RF\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -RFm > $uls_output
+ls -RFm > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -RFm\" OK "
+else
+    echo "\"uls -RFm\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -S > $uls_output
+ls -S > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -S\" OK "
+else
+    echo "\"uls -S\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -Sr > $uls_output
+ls -Sr > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -Sr\" OK "
+else
+    echo "\"uls -Sr\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -Sl > $uls_output
+ls -Sl > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -Sl\" OK "
+else
+    echo "\"uls -Sl\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -SC > $uls_output
+ls -SC > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -SC\" OK "
+else
+    echo "\"uls -SC\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -S1 > $uls_output
+ls -S1 > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -S1\" OK "
+else
+    echo "\"uls -S1\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -1S > $uls_output
+ls -1S > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -1S\" OK "
+else
+    echo "\"uls -1S\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -Sm > $uls_output
+ls -Sm > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -Sm\" OK "
+else
+    echo "\"uls -Sm\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -SR > $uls_output
+ls -SR > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -SR\" OK "
+else
+    echo "\"uls -SR\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -RS > $uls_output
+ls -RS > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -RS\" OK "
+else
+    echo "\"uls -RS\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -SRCGm > $uls_output
+ls -SRCGm > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -SRCGm\" OK "
+else
+    echo "\"uls -SRCGm\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -t > $uls_output
+ls -t > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -t\" OK "
+else
+    echo "\"uls -t\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -c > $uls_output
+ls -c > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -c\" OK "
+else
+    echo "\"uls -c\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -u > $uls_output
+ls -u > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -u\" OK "
+else
+    echo "\"uls -u\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -U > $uls_output
+ls -U > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -U\" OK "
+else
+    echo "\"uls -U\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -cu > $uls_output
+ls -cu > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -cu\" OK "
+else
+    echo "\"uls -cu\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -UcS > $uls_output
+ls -UcS > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -UcS\" OK "
+else
+    echo "\"uls -UcS\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -RUc > $uls_output
+ls -RUc > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -RUc\" OK "
+else
+    echo "\"uls -RUc\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -f > $uls_output
+ls -f > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -f\" OK "
+else
+    echo "\"uls -f\" FALSE"
+    # echo "$diff_res"
+fi
+
+
+./uls -fR > $uls_output
+ls -fR > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -fR\" OK "
+else
+    echo "\"uls -fR\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -ft > $uls_output
+ls -ft > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -ft\" OK "
+else
+    echo "\"uls -ft\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -tfa > $uls_output
+ls -tfa > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -tfa\" OK "
+else
+    echo "\"uls -tfa\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -tR > $uls_output
+ls -tR > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -tR\" OK "
+else
+    echo "\"uls -tR\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -tR > $uls_output
+ls -tR > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -Rt\" OK "
+else
+    echo "\"uls -Rt\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -lg > $uls_output
+ls -lg > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -lg\" OK "
+else
+    echo "\"uls -lg\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -lo > $uls_output
+ls -lo > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -lo\" OK "
+else
+    echo "\"uls -lo\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -log > $uls_output
+ls -log > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -log\" OK "
+else
+    echo "\"uls -log\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -og > $uls_output
+ls -og > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -og\" OK "
+else
+    echo "\"uls -og\" FALSE"
+    # echo "$diff_res"
+fi
+
+./uls -go > $uls_output
+ls -go > $ls_output
+diff_res=$(diff $uls_output $ls_output)
+if [ $? -eq 0 ]; then
+    echo "\"uls -go\" OK "
+else
+    echo "\"uls -go\" FALSE"
+    # echo "$diff_res"
+fi
+
+
 # Очистить временные файлы
 rm $uls_output
 rm $ls_output
