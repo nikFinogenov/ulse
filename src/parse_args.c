@@ -20,6 +20,7 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                         flags->C = false;
                         flags->one = false;
                         flags->m = false;
+                        flags->x = false;
                         break;
                     case 'r':
                         if(!flags->f) flags->r = true;
@@ -59,6 +60,9 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                         break;
                     case 'x':
                         flags->x = true;
+                        flags->l = false;
+                        flags->C = false;
+                        flags->one = false;
                         break;
                     case 'p':
                         flags->p = true;
@@ -73,6 +77,7 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                         break;
                     case 'n':
                         flags->n = true;
+                        flags->l = true;
                         break;
                     case 'g':
                         flags->g = true;
@@ -91,6 +96,7 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                         flags->C = false;
                         flags->l = false;
                         flags->m = false;
+                        flags->x = false;
                         break;
                     case '@':
                         flags->at = true;
@@ -99,6 +105,7 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                         flags->C = true;
                         flags->one = false;
                         flags->l = false;
+                        flags->x = false;
                         break;
                     case 'm':
                         flags->m = true;
@@ -110,14 +117,14 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
                         flags->u = false;
                         flags->c = false;
                         break;
-                    case 'q':
-                        flags->q = true;
-                        break;
-                    case 'H':
-                        flags->H = true;
+                    case 'i':
+                        flags->i = true;
                         break;
                     default:
-                        fprintf(stderr, "Unrecognized flag: -%c\n", argv[i][j]);
+                        mx_printerr("uls: illegal option -- ");
+                        mx_printerr(&argv[i][j]);
+                        mx_printerr("\n");
+                        mx_printerr("usage: uls [-@ACFGHRSTUacefghlmnopqrtux1] [file ...]\n");
                         exit(1);
                 }
             }
@@ -130,13 +137,31 @@ int parse_args(int argc, char *argv[], s_flags_t *flags) {
 int parse_dirs(int argc, char *argv[], char ***dirs) {
     int i, dir_count = 0;
 
-    *dirs = malloc((argc - 1) * sizeof(char *)); // выделяем память для массива указателей
+    *dirs = malloc((argc - 1) * sizeof(char *));
 
     for (i = 1; i < argc; i++) {
         if (argv[i][0] != '-') {
-            (*dirs)[dir_count] = strdup(argv[i]); // используем strdup для копирования строки
-            dir_count++;
+            if(is_directory_exists(argv[i]) || is_file_exists(argv[i])) {
+                (*dirs)[dir_count] = strdup(argv[i]);
+                dir_count++;
+            }
         }
     }
     return dir_count;
+}
+int parse_err_dirs(int argc, char *argv[], char ***err_dirs) {
+    int i, err_dir_count = 0;
+
+    *err_dirs = malloc((argc - 1) * sizeof(char *));
+
+    for (i = 1; i < argc; i++) {
+        if (argv[i][0] != '-') {
+            if(!(is_directory_exists(argv[i]) || is_file_exists(argv[i]))) {
+                (*err_dirs)[err_dir_count] = strdup(argv[i]);
+                err_dir_count++;
+            }
+            
+        }
+    }
+    return err_dir_count;
 }

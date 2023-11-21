@@ -1,7 +1,7 @@
 #include "inc/libmx.h"
 
 int main (void) {
-    char n[256] = "qwe";
-    mx_printint(mx_strlen(n));
+    unsigned long qwe = 4294967290;
+    mx_printstr(mx_ultoa(qwe));
     return 0;
 }

@@ -23,6 +23,7 @@ typedef struct s_list {
     struct s_list *next;
 } t_list;
 
+char* mx_ultoa(unsigned long value);
 char *mx_double_to_str(double number);
 char *mx_lltoa(long long n);
 int mx_intlen(int n);

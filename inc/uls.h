@@ -46,19 +46,18 @@ typedef struct s_flags_n{
     bool p; //DONE Flag for option 'p': Add a trailing '/' to directory names.
     bool r; //DONE Flag for option 'r': Reverse the order of listing.
     bool h; //DONE Flag for option 'h': Human-readable file sizes (e.g., in KB, MB).
-    bool e; //? Flag for option 'e': Display the escape sequences for control characters.
-    bool T; // Flag for option 'T': Display full time information.
+    bool e; //DONE Flag for option 'e': Display the escape sequences for control characters.
+    bool T; //DONE Flag for option 'T': Display full time information.
     bool at;//DONE Flag for option '@': Extended attribute keys.
     bool g; //DONE Flag for option 'g': Like 'l', but excludes the owner.
     bool o; //DONE Flag for option 'o': Like 'l', but excludes the group.
-    bool x; //? Flag for option 'x': List entries by lines, rather than columns.
-    bool n; // Flag for option 'n': List numeric user and group IDs instead of names.
-    
-    
-    bool q; //? Flag Force printing of non-graphic characters in file names as the character ‘?’; this is the default when output is to a terminal.
-    bool H; //? Flag Symbolic links on the command line are followed.  This option is assumed if none of the -F, -d, or -l options are specified.
-    //bool i; //! Flag for option 'i': Show the file's inode number.
-    //bool d; //! Flag for option 'd': List the directory itself, rather than its contents.
+    bool x; //DONE? Flag for option 'x': List entries by lines, rather than columns.
+    bool n; //DONE Flag for option 'n': List numeric user and group IDs instead of names.
+    bool i; //DONE! Flag for option 'i': Show the file's inode number.
+    // bool q; //? Flag Force printing of non-graphic characters in file names as the character ‘?’; this is the default when output is to a terminal.
+    // bool H; //? Flag Symbolic links on the command line are followed.  This option is assumed if none of the -F, -d, or -l options are specified.
+    //
+    //
 
 
     // bool L; //SKIP Flag for option 'L': Follow symbolic links when listing.
@@ -102,9 +101,22 @@ typedef struct {
     int max_h_size_len;
 } t_max_sizes_s;
 
+
+bool is_smth_except_dir(const char *filename);
+bool is_smth(const char *filename);
+bool is_whiteout(const char *filename);
+bool is_socket(const char *filename);
+bool is_link(const char *filename);
+bool is_fifo(const char *filename);
+bool is_executable(const char *filename);
+bool is_dir(const char *filename);
+int is_directory_empty(const char *dirname);
+int is_directory_exists(const char *dirname);
+int is_file_exists(const char *dirname);
 void switch_strcolor(struct stat sb);
 int parse_args(int argc, char *argv[], s_flags_t *flags);
 int parse_dirs(int argc, char *argv[], char ***dirs);
+int parse_err_dirs(int argc, char *argv[], char ***err_dirs);
 void print_multicolumn(FileEntry *file_entries, int count, s_flags_t *flags);
 void print_perline(FileEntry *file_entries, int count, s_flags_t *flags);
 int compare_names(const void *a, const void *b, bool rev);
@@ -112,7 +124,7 @@ void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*co
 void init_flags(s_flags_t *flags);
 void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_flags_t *flags);
 FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags);
-FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags);
+FileEntry *fill_entry(const char *linkname, s_flags_t *flags);
 int compare_file_entries_name(const void *a, const void *b, bool rev);
 int compare_file_entries_size(const void *a, const void *b, bool rev);
 int compare_file_entries_date_time(const void *a, const void *b, bool rev);
