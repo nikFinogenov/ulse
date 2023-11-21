@@ -1,14 +1,6 @@
 #include "uls.h"
 #include "stdlib.h"
 
-static bool is_dir(const char *filename) {
-    struct stat st;
-    if (lstat(filename, &st) == 0) {
-        return S_ISDIR(st.st_mode) && !S_ISLNK(st.st_mode);
-    }
-    return false;
-}
-
 static void printint_formatted(int n, int width) {
     int num_width = 0;
     int temp = n;
@@ -33,49 +25,6 @@ static void printstr_formatted(char *str, int wid, bool right) {
         mx_printstr(str);
 }
 
-static bool is_executable(const char *filename) {
-    struct stat st;
-    if (lstat(filename, &st) == 0) {
-        return st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH) && !S_ISLNK(st.st_mode);
-    }
-    return false;
-}
-
-static bool is_fifo(const char *filename) {
-    struct stat st;
-    if (stat(filename, &st) == 0) {
-        return S_ISFIFO(st.st_mode) && !S_ISLNK(st.st_mode);
-    }
-    return false;
-}
-static bool is_link(const char *filename) {
-    struct stat st;
-    if (lstat(filename, &st) == 0) {
-        return S_ISLNK(st.st_mode);
-    }
-    return false;
-}
-static bool is_socket(const char *filename) {
-    struct stat st;
-    if (stat(filename, &st) == 0) {
-        return S_ISSOCK(st.st_mode)&& !S_ISLNK(st.st_mode);
-    }
-    return false;
-}
-
-static bool is_whiteout(const char *filename) {
-    struct stat st;
-    if (stat(filename, &st) == 0) {
-        return S_ISCHR(st.st_mode) && !S_ISLNK(st.st_mode);
-    }
-    return false;
-}
-
-static bool is_smth(const char *filename) {
-    return is_dir(filename) || is_executable(filename) 
-    || is_fifo(filename) || is_link(filename) 
-    || is_socket(filename) || is_whiteout(filename);
-}
 void print_multicolumn(FileEntry *file_entries, int count, s_flags_t *flags) {
     int terminal_width = 80;
     if (isatty(1)) {
@@ -87,6 +36,7 @@ void print_multicolumn(FileEntry *file_entries, int count, s_flags_t *flags) {
         int max_name_length = 0;
         for (int i = 0; i < count; ++i) {
             int name_length = mx_strlen(file_entries[i].name);
+            if(flags->i) name_length += 9;
             if (flags->p) name_length += 1;
             if (name_length > max_name_length) {
                 max_name_length = name_length;
@@ -99,8 +49,12 @@ void print_multicolumn(FileEntry *file_entries, int count, s_flags_t *flags) {
         int index = 0;
         int rows = (count + num_columns - 1) / num_columns;
         for (int i = 0; i < rows; ++i) {
-            index = i;
+            if(!flags->x) index = i;
             for (int j = 0; j < num_columns; j++) {
+                if(flags->i) {
+            printstr_formatted(mx_ultoa(file_entries[index].inode), 8, true);
+            mx_printchar(' ');
+        }
             if(flags->G) {
                 struct stat sb;
                 
@@ -113,6 +67,7 @@ void print_multicolumn(FileEntry *file_entries, int count, s_flags_t *flags) {
                 mx_printstr(file_entries[index].name);
                 if(flags->G) mx_printstr(DEFAULT_COLOR);
                 int name_len = mx_strlen(file_entries[index].name);
+                if(flags->i) name_len += 9;
                 if(flags->p && is_dir(file_entries[index].path)) {
                     mx_printchar('/');
                     name_len += 1;
@@ -138,20 +93,22 @@ void print_multicolumn(FileEntry *file_entries, int count, s_flags_t *flags) {
                     name_len += 1;
                 }
                 
-                index = index + rows;
-                if (index >= count)
-                    break;
+                if(!flags->x) index = index + rows;
+                else index++;
+                if (index >= count) break;
                 int tabs = (width - name_len + tab - 1) / tab;
-                for (int i = 0; i < tabs; i++) {
+                if ((j == num_columns - 1) && flags->x) continue;
+                for (int k = 0; k < tabs; k++) {
                     if (tab == 1)
                         mx_printchar(' ');
-                    else
-                        mx_printchar('\t');
+                    else 
+                        mx_printchar('\t'); 
                 }
             }
             mx_printchar('\n');
         }
 }
+
 void print_xattr(const FileEntry *file_entry, s_flags_t *flags) {
     for (char **ptr = file_entry->xattr_keys; *ptr != NULL; ptr++) {
         mx_printchar('\t');
@@ -202,6 +159,11 @@ void print_xattr(const FileEntry *file_entry, s_flags_t *flags) {
 
 void print_perline(FileEntry *file_entries, int count, s_flags_t *flags) {
     for (int i = 0; i < count; i++) {
+                if(flags->i) {
+            // mx_printstr(mx_ultoa(file_entries[i].inode));
+            printstr_formatted(mx_ultoa(file_entries[i].inode), 8, true);
+            mx_printchar(' ');
+        }
                     if(flags->G) {
                 struct stat sb;
                 if (lstat(file_entries[i].path, &sb) == -1) {
@@ -238,6 +200,11 @@ void print_perline(FileEntry *file_entries, int count, s_flags_t *flags) {
 }
 
 void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize, s_flags_t *flags) {
+    if(flags->i) {
+        // mx_printstr(mx_ultoa(file_entries[i].inode));
+        printstr_formatted(mx_ultoa(file_entries[i].inode), 8, true);
+        mx_printchar(' ');
+    }
     mx_printchar(file_entries[i].type);
     for (int j = 0; j < mx_strlen(file_entries[i].permissions); j++) {
         mx_printchar(file_entries[i].permissions[j]);
@@ -316,6 +283,11 @@ void print_file_entry(const FileEntry *file_entries, int i, t_max_sizes_s mxsize
 void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_flags_t *flags) {
     int total_blocks = 0;
     struct stat sb;
+    // if(is_directory_empty(dirname)) {
+    //     mx_printstr("total 0");
+    //     return;
+    // }
+    // mx_printstr(dirname);
     if (lstat(dirname, &sb) == -1) {
         perror("Cannot get directory information");
         exit(1);
@@ -362,6 +334,25 @@ void print_longlist(const char *dirname, FileEntry *file_entries, int count, s_f
     }
     for (int i = 0; i < count; ++i) {
         print_file_entry(file_entries, i, t_mxsize, flags);
+        if(acl_get_file(file_entries[i].path, ACL_TYPE_EXTENDED) && flags->e) {
+                char **str_split = mx_strsplit(acl_to_text(acl_get_file(file_entries[i].path, ACL_TYPE_EXTENDED), NULL), '\n');
+                for (int i = 1; str_split[i] != NULL; i++) {
+                    char **parts = mx_strsplit(str_split[i], ':');
+                    mx_printchar(' ');
+                    mx_printint(i - 1);
+                    mx_printstr(": ");
+                    mx_printstr(parts[0]);
+                    mx_printchar(':');
+                    mx_printstr(parts[2]);
+                    mx_printchar(' ');
+                    mx_printstr(parts[4]);
+                    mx_printchar(' ');
+                    mx_printstr(parts[5]);
+                    mx_printchar('\n');
+                    mx_del_strarr(&parts);
+                }
+                mx_del_strarr(&str_split);
+        }
     }
 }
 
@@ -374,10 +365,18 @@ void print_coma(FileEntry *file_entries, int count, s_flags_t *flags) {
     }
     int total_width = 0;
     for (int i = 0; i < count; i++) {
-        if((i + 1 == count) && (flags->p || flags->F) && is_smth(file_entries[i].path) 
+        if((i + 1 == count) && (flags->p || flags->F) && (flags->i) && is_smth(file_entries[i].path) 
+        && ((total_width + mx_strlen(file_entries[i].name) + 9 + 1) <= terminal_width)){}
+        else if((flags->p || flags->F)  && (flags->i) && is_smth(file_entries[i].path) 
+        && ((total_width + mx_strlen(file_entries[i].name) + 2 + 1 + 9) > terminal_width)) {
+            mx_printchar('\n');
+            total_width = 0;
+        }
+        else if((i + 1 == count) && (flags->p || flags->F) && is_smth(file_entries[i].path) 
         && ((total_width + mx_strlen(file_entries[i].name) + 1) <= terminal_width)){}
         else if((flags->p || flags->F) && is_smth(file_entries[i].path) 
         && ((total_width + mx_strlen(file_entries[i].name) + 2 + 1) > terminal_width)) {
+            // printf("%d -> %d\n", total_width, terminal_width);
             mx_printchar('\n');
             total_width = 0;
         }
@@ -385,6 +384,11 @@ void print_coma(FileEntry *file_entries, int count, s_flags_t *flags) {
         else if ((total_width + mx_strlen(file_entries[i].name) + 2) >= terminal_width) {
             mx_printchar('\n');
             total_width = 0;
+        }
+        if(flags->i) {
+            // mx_printstr(mx_ultoa(file_entries[i].inode));
+            printstr_formatted(mx_ultoa(file_entries[i].inode), 8, true);
+            mx_printchar(' ');
         }
             if(flags->G) {
                 struct stat sb;
@@ -411,10 +415,10 @@ void print_coma(FileEntry *file_entries, int count, s_flags_t *flags) {
                 else if(flags->F && is_fifo(file_entries[i].path)) {
                     mx_printchar('|');
                 }
-
         if (i + 1 != count) mx_printstr(", ");
         total_width = total_width + mx_strlen(file_entries[i].name) + 2;
-        if((flags->p || flags->F) && is_smth(file_entries[i].path)) total_width++;
+        if((flags->p && is_dir(file_entries[i].path)) || (flags->F && is_smth(file_entries[i].path))) total_width++;
+        if(flags->i) total_width+=9;
     }
     mx_printchar('\n');
 }

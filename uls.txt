@@ -1,22 +1,3 @@
-video1.mp4
-uls
-uls_link
-video2.mp4
-tests.sh
-qwe.txt
-ls.txt
-Makefile
-libmx
-obj
-src
-irepe.txt
-temp
-inc
-file2
-file1
-ln_file1
-file3
-ln_lemp
-uls.txt
-my_fifo
-qweqwe
+Makefile, asd/, file1, file2, file3, inc/, irepe.txt, libmx/, ln_file1, 
+ln_lemp, ls.txt, my_fifo, obj/, qwe.txt, qweqwe, src/, temp/, tests.sh, tfmp/, 
+uls, uls.txt, uls_link, video1.mp4, video2.mp4

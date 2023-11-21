@@ -41,6 +41,65 @@ int compare_file_entries_size(const void *a, const void *b, bool rev) {
     return ((FileEntry *)a)->size - ((FileEntry *)b)->size;
 }
 
+bool is_dir(const char *filename) {
+    struct stat st;
+    if (lstat(filename, &st) == 0) {
+        return S_ISDIR(st.st_mode) && !S_ISLNK(st.st_mode);
+    }
+    return false;
+}
+bool is_executable(const char *filename) {
+    struct stat st;
+    if (lstat(filename, &st) == 0) {
+        return st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH) && !S_ISLNK(st.st_mode);
+    }
+    return false;
+}
+
+bool is_fifo(const char *filename) {
+    struct stat st;
+    if (stat(filename, &st) == 0) {
+        return S_ISFIFO(st.st_mode) && !S_ISLNK(st.st_mode);
+    }
+    return false;
+}
+bool is_link(const char *filename) {
+    struct stat st;
+    if (lstat(filename, &st) == 0) {
+        return S_ISLNK(st.st_mode);
+    }
+    return false;
+}
+bool is_socket(const char *filename) {
+    struct stat st;
+    if (stat(filename, &st) == 0) {
+        return S_ISSOCK(st.st_mode)&& !S_ISLNK(st.st_mode);
+    }
+    return false;
+}
+
+bool is_whiteout(const char *filename) {
+    struct stat st;
+    if (stat(filename, &st) == 0) {
+        return S_ISCHR(st.st_mode) && !S_ISLNK(st.st_mode);
+    }
+    return false;
+}
+
+bool is_smth(const char *filename) {
+    return is_dir(filename) || is_executable(filename) 
+    || is_fifo(filename) || is_link(filename) 
+    || is_socket(filename) || is_whiteout(filename);
+}
+
+bool is_smth_except_dir(const char *filename) {
+    return is_executable(filename) 
+    || is_fifo(filename) || is_link(filename) 
+    || is_socket(filename) || is_whiteout(filename);
+}
+
+
+
 void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*comparator)(const void *, const void *, bool), s_flags_t *flags) {
     for (size_t i = 0; i < num_elements - 1; ++i) {
         for (size_t j = i + 1; j < num_elements; ++j) {
@@ -84,7 +143,42 @@ char *format_size(long size) {
     result = mx_strjoin(result, suffix[i]);
     return result;
 }
+int is_directory_exists(const char *dirname) {
+    DIR *dir = opendir(dirname);
 
+    if (dir != NULL) {
+        closedir(dir);
+        return 1;
+    }
+
+    return 0; 
+}
+int is_directory_empty(const char *dirname) {
+    DIR *dir = opendir(dirname);
+    if (dir == NULL) {
+        perror("opendir");
+        exit(EXIT_FAILURE);
+    }
+
+    struct dirent *entry;
+    int file = 0;
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (mx_strcmp(entry->d_name, ".") == 0 || mx_strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+        file++;
+        break;
+    }
+
+    closedir(dir);
+
+    return file == 0;
+}
+int is_file_exists(const char *dirname) {
+    struct stat buffer;
+    return stat(dirname, &buffer) == 0;
+}
 void init_flags(s_flags_t *flags) {
     flags->one = false;
     flags->C = false;
@@ -111,8 +205,7 @@ void init_flags(s_flags_t *flags) {
     flags->o = false;
     flags->x = false;
     flags->n = false;
-    flags->q = false;
-    flags->H = false;
+    flags->i = false;
 }
 char **get_xattr(const char *filename) {
     char buffer[1024] = {'\0'};
@@ -125,18 +218,37 @@ char **get_xattr(const char *filename) {
 
     return NULL;
 }
-FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags) {
+FileEntry *fill_entry(const char *name, s_flags_t *flags) {
     while (flags)
         break;
     struct stat sb;
-    if (lstat(linkname, &sb) == -1) {
+    // int fd = open(linkname, O_RDONLY);
+    // if (stat(linkname, &sb) == -1) {
+    //     perror("Cannot get directory information");
+    //     return NULL;
+    // }
+    // mx_printstr(linkname);
+    if (lstat(name, &sb) == -1) {
         perror("Cannot get directory information");
         return NULL;
     }
     FileEntry *file_entry = malloc(sizeof(FileEntry));
-    file_entry->name = mx_strdup(linkname);
-    file_entry->path = mx_strdup(linkname);
-    file_entry->type = 'l';
+    if(flags->i) file_entry->inode = sb.st_ino;
+    file_entry->name = mx_strdup(name);
+    file_entry->path = mx_strdup(name);
+    if (S_ISLNK(sb.st_mode))
+            file_entry->type = 'l';
+        else if (S_ISSOCK(sb.st_mode))
+            file_entry->type = 's';
+        else if (S_ISCHR(sb.st_mode))
+            file_entry->type = 'c';
+        else if (S_ISFIFO(sb.st_mode))
+            file_entry->type = 'p';
+        else if (S_ISBLK(sb.st_mode))
+            file_entry->type = 'b';
+        else
+            file_entry->type = '-';
+
     char *new_permissions = NULL;
     new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IRUSR) ? "r" : "-");
     new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IWUSR) ? "w" : "-");
@@ -147,10 +259,10 @@ FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags) {
     new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IROTH) ? "r" : "-");
     new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IWOTH) ? "w" : "-");
     new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IXOTH) ? "x" : "-");
-    new_permissions = mx_strjoin(new_permissions, (listxattr(linkname, NULL, 0, 0x0001) > 0) ? "@" : (acl_get_file(linkname, ACL_TYPE_EXTENDED)) ? "+" : " ");
+    new_permissions = mx_strjoin(new_permissions, (listxattr(name, NULL, 0, 0x0001) > 0) ? "@" : (acl_get_file(name, ACL_TYPE_EXTENDED)) ? "+" : " ");
                                                                                                                                                  
     if (S_ISLNK(sb.st_mode))
-        readlink(linkname, file_entry->symlink, sizeof(file_entry->symlink));
+        readlink(name, file_entry->symlink, sizeof(file_entry->symlink));
     if ((unsigned long)mx_strlen(new_permissions) < sizeof(file_entry->permissions)) {
         mx_strcpy(file_entry->permissions, new_permissions);
     }
@@ -163,8 +275,14 @@ FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags) {
 
     struct passwd *pw = getpwuid(sb.st_uid);
     struct group *gr = getgrgid(sb.st_gid);
-    mx_strcpy(file_entry->owner, pw->pw_name);
-    mx_strcpy(file_entry->group, gr->gr_name);
+    if(!flags->n) {
+        mx_strcpy(file_entry->owner, pw->pw_name);
+        mx_strcpy(file_entry->group, gr->gr_name);
+    }
+    else {
+        mx_strcpy(file_entry->owner, mx_itoa(pw->pw_uid));
+        mx_strcpy(file_entry->group, mx_itoa(gr->gr_gid));
+    }
     if (flags->h) {
         char *new_size = NULL;
         new_size = mx_strjoin(new_size, format_size(sb.st_size));
@@ -185,7 +303,21 @@ FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags) {
     time_t six_months_sec = (365 / 2) * 24 * 60 * 60;
     arr[4][4] = '\0';
     char *new_date_time = NULL;
-    if (timesp.tv_sec + six_months_sec <= now || timesp.tv_sec >= now + six_months_sec) {
+    if (flags->T) {
+        for (int i = 1; arr[i] != NULL; i++) {
+            int spaces = 2 - mx_strlen(arr[i]);
+            for (int i = 0; i < spaces; i++) {
+                new_date_time = mx_strjoin(new_date_time, " ");
+            }
+            new_date_time = mx_strjoin(new_date_time, arr[i]);
+
+
+            if (arr[i + 1] != NULL) {
+                new_date_time = mx_strjoin(new_date_time, " ");
+            }
+        }
+    }
+    else if (timesp.tv_sec + six_months_sec <= now || timesp.tv_sec >= now + six_months_sec) {
         new_date_time = mx_strjoin(new_date_time, arr[1]);
         new_date_time = mx_strjoin(new_date_time, " ");
         int spaces = 2 - mx_strlen(arr[2]);
@@ -215,8 +347,8 @@ FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags) {
     }
 
     mx_del_strarr(&arr);
-    if (strlen(new_date_time) < sizeof(file_entry->date_time)) {
-        strcpy(file_entry->date_time, new_date_time);
+    if ((unsigned long)mx_strlen(new_date_time) <= sizeof(file_entry->date_time)) {
+        mx_strcpy(file_entry->date_time, new_date_time);
     }
     else {
         perror("Bad time");
@@ -225,7 +357,7 @@ FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags) {
     free(new_date_time);
 
     if (S_ISLNK(sb.st_mode)) {
-        ssize_t len = readlink(linkname, file_entry->symlink, sizeof(file_entry->symlink) - 1);
+        ssize_t len = readlink(name, file_entry->symlink, sizeof(file_entry->symlink) - 1);
         if (len != -1) {
             file_entry->symlink[len] = '\0';
         }
@@ -236,7 +368,7 @@ FileEntry *fill_link_entry(const char *linkname, s_flags_t *flags) {
     else {
         file_entry->symlink[0] = '\0';
     }
-    file_entry->xattr_keys = get_xattr(linkname);
+    file_entry->xattr_keys = get_xattr(name);
 
     return file_entry;
 }
@@ -322,13 +454,17 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
 
         file_path = mx_strjoin(mx_strjoin(dirname, "/"), entry->d_name);
 
+        // int fd = open("/path/to/your/file");;
         if (lstat(file_path, &sb) == -1) {
             perror("Cannot get file information");
             continue;
         }
-
+        // if (lstat(file_path, &sb) == -1) {
+        //     perror("Cannot get file information");
+        //     continue;
+        // }
         FileEntry *file_entry = &file_entries[index];
-
+        if(flags->i) file_entry->inode = sb.st_ino;
         file_entry->name = mx_strdup(entry->d_name);
         file_entry->path = mx_strdup(file_path);
         if (file_entry->name == NULL) {
@@ -337,7 +473,6 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
             closedir(dir);
             return NULL;
         }
-
         if (S_ISDIR(sb.st_mode))
             file_entry->type = 'd';
         else if (S_ISLNK(sb.st_mode))
@@ -363,7 +498,7 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
         new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IROTH) ? "r" : "-");
         new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IWOTH) ? "w" : "-");
         new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IXOTH) ? "x" : "-");
-        new_permissions = mx_strjoin(new_permissions, (listxattr(file_path, NULL, 0, 0x0001) > 0) ? "@" : (acl_get_file(file_path, ACL_TYPE_EXTENDED)) ? "+"
+        new_permissions = mx_strjoin(new_permissions, (listxattr(file_path, NULL, 0, XATTR_NOFOLLOW) > 0) ? "@" : (acl_get_file(file_path, ACL_TYPE_EXTENDED)) ? "+"
                                                                                                                                                        : " ");
         if (S_ISLNK(sb.st_mode))
             readlink(file_path, file_entry->symlink, sizeof(file_entry->symlink));
@@ -379,8 +514,14 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
 
         struct passwd *pw = getpwuid(sb.st_uid);
         struct group *gr = getgrgid(sb.st_gid);
-        mx_strcpy(file_entry->owner, pw->pw_name);
-        mx_strcpy(file_entry->group, gr->gr_name);
+        if(!flags->n) {
+            mx_strcpy(file_entry->owner, pw->pw_name);
+            mx_strcpy(file_entry->group, gr->gr_name);
+        }
+        else {
+            mx_strcpy(file_entry->owner, mx_itoa(pw->pw_uid));
+            mx_strcpy(file_entry->group, mx_itoa(gr->gr_gid));
+        }
         if (flags->h) {
             char *new_size = NULL;
             new_size = mx_strjoin(new_size, format_size(sb.st_size));
@@ -401,7 +542,27 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
         time_t six_months_sec = (365 / 2) * 24 * 60 * 60;
         arr[4][4] = '\0';
         char *new_date_time = NULL;
-        if (timesp.tv_sec + six_months_sec <= now || timesp.tv_sec >= now + six_months_sec) {
+        if (flags->T) {
+
+
+            for (int i = 1; arr[i] != NULL; i++) {
+
+
+                int spaces = 2 - mx_strlen(arr[i]);
+                for (int i = 0; i < spaces; i++) {
+                    new_date_time = mx_strjoin(new_date_time, " ");
+                }
+                new_date_time = mx_strjoin(new_date_time, arr[i]);
+
+
+                if (arr[i + 1] != NULL) {
+                    new_date_time = mx_strjoin(new_date_time, " ");
+                }
+            }
+
+
+        }
+        else if (timesp.tv_sec + six_months_sec <= now || timesp.tv_sec >= now + six_months_sec) {
             new_date_time = mx_strjoin(new_date_time, arr[1]);
             new_date_time = mx_strjoin(new_date_time, " ");
             int spaces = 2 - mx_strlen(arr[2]);
@@ -431,8 +592,8 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
         }
 
         mx_del_strarr(&arr);
-        if (strlen(new_date_time) < sizeof(file_entry->date_time)) {
-            strcpy(file_entry->date_time, new_date_time);
+        if ((unsigned long)mx_strlen(new_date_time) <= sizeof(file_entry->date_time)) {
+            mx_strcpy(file_entry->date_time, new_date_time);
         }
         else {
             perror("Bad time");
