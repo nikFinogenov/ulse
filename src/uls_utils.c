@@ -1,44 +1,50 @@
 #include <uls.h>
 
+double custom_round(double value) {
+    double result = value + 0.5;
+    return (long)result;
+}
+
 int compare_names(const void *a, const void *b, bool rev) {
-    if(!rev) 
+    if (!rev)
         return mx_strcmp(*(const char **)a, *(const char **)b);
     return mx_strcmp(*(const char **)b, *(const char **)a);
 }
 
 int compare_file_entries_name(const void *a, const void *b, bool rev) {
-    if(!rev)
-        return mx_strcmp(((FileEntry *)a)->name, ((FileEntry *)b)->name);
-    return mx_strcmp(((FileEntry *)b)->name, ((FileEntry *)a)->name);
+    if (!rev)
+        return mx_strcmp(((t_file_entry_s *)a)->name, ((t_file_entry_s *)b)->name);
+    return mx_strcmp(((t_file_entry_s *)b)->name, ((t_file_entry_s *)a)->name);
 }
 
 int compare_file_entries_date_time(const void *a, const void *b, bool rev) {
-    if(!rev) {
-        if(((FileEntry *)b)->cmptime.tv_sec - ((FileEntry *)a)->cmptime.tv_sec == 0) {
-            if(((FileEntry *)b)->cmptime.tv_nsec - ((FileEntry *)a)->cmptime.tv_nsec == 0)
-                return mx_strcmp(((FileEntry *)a)->name, ((FileEntry *)b)->name);
-            return ((FileEntry *)b)->cmptime.tv_nsec - ((FileEntry *)a)->cmptime.tv_nsec;
+    if (!rev) {
+        if (((t_file_entry_s *)b)->cmptime.tv_sec - ((t_file_entry_s *)a)->cmptime.tv_sec == 0) {
+            if (((t_file_entry_s *)b)->cmptime.tv_nsec - ((t_file_entry_s *)a)->cmptime.tv_nsec == 0)
+                return mx_strcmp(((t_file_entry_s *)a)->name, ((t_file_entry_s *)b)->name);
+            return ((t_file_entry_s *)b)->cmptime.tv_nsec - ((t_file_entry_s *)a)->cmptime.tv_nsec;
         }
-        return ((FileEntry *)b)->cmptime.tv_sec - ((FileEntry *)a)->cmptime.tv_sec;
+        return ((t_file_entry_s *)b)->cmptime.tv_sec - ((t_file_entry_s *)a)->cmptime.tv_sec;
     }
     else {
-        if(((FileEntry *)a)->cmptime.tv_sec - ((FileEntry *)b)->cmptime.tv_sec == 0) {
-            if(((FileEntry *)a)->cmptime.tv_nsec - ((FileEntry *)b)->cmptime.tv_nsec == 0)
-                return mx_strcmp(((FileEntry *)b)->name, ((FileEntry *)a)->name);
-            return ((FileEntry *)a)->cmptime.tv_nsec - ((FileEntry *)b)->cmptime.tv_nsec;
+        if (((t_file_entry_s *)a)->cmptime.tv_sec - ((t_file_entry_s *)b)->cmptime.tv_sec == 0) {
+            if (((t_file_entry_s *)a)->cmptime.tv_nsec - ((t_file_entry_s *)b)->cmptime.tv_nsec == 0)
+                return mx_strcmp(((t_file_entry_s *)b)->name, ((t_file_entry_s *)a)->name);
+            return ((t_file_entry_s *)a)->cmptime.tv_nsec - ((t_file_entry_s *)b)->cmptime.tv_nsec;
         }
-        return ((FileEntry *)a)->cmptime.tv_sec - ((FileEntry *)b)->cmptime.tv_sec;
+        return ((t_file_entry_s *)a)->cmptime.tv_sec - ((t_file_entry_s *)b)->cmptime.tv_sec;
     }
 }
 
 int compare_file_entries_size(const void *a, const void *b, bool rev) {
-    if(!rev) {
-        if(((FileEntry *)b)->size - ((FileEntry *)a)->size == 0) return mx_strcmp(((FileEntry *)a)->name, ((FileEntry *)b)->name);
-        return ((FileEntry *)b)->size - ((FileEntry *)a)->size;
+    if (!rev) {
+        if (((t_file_entry_s *)b)->size - ((t_file_entry_s *)a)->size == 0)
+            return mx_strcmp(((t_file_entry_s *)a)->name, ((t_file_entry_s *)b)->name);
+        return ((t_file_entry_s *)b)->size - ((t_file_entry_s *)a)->size;
     }
-    else 
-        if(((FileEntry *)b)->size - ((FileEntry *)a)->size == 0) return mx_strcmp(((FileEntry *)b)->name, ((FileEntry *)a)->name);
-    return ((FileEntry *)a)->size - ((FileEntry *)b)->size;
+    else if (((t_file_entry_s *)b)->size - ((t_file_entry_s *)a)->size == 0)
+        return mx_strcmp(((t_file_entry_s *)b)->name, ((t_file_entry_s *)a)->name);
+    return ((t_file_entry_s *)a)->size - ((t_file_entry_s *)b)->size;
 }
 
 bool is_dir(const char *filename) {
@@ -48,6 +54,7 @@ bool is_dir(const char *filename) {
     }
     return false;
 }
+
 bool is_executable(const char *filename) {
     struct stat st;
     if (lstat(filename, &st) == 0) {
@@ -63,6 +70,7 @@ bool is_fifo(const char *filename) {
     }
     return false;
 }
+
 bool is_link(const char *filename) {
     struct stat st;
     if (lstat(filename, &st) == 0) {
@@ -70,10 +78,11 @@ bool is_link(const char *filename) {
     }
     return false;
 }
+
 bool is_socket(const char *filename) {
     struct stat st;
     if (stat(filename, &st) == 0) {
-        return S_ISSOCK(st.st_mode)&& !S_ISLNK(st.st_mode);
+        return S_ISSOCK(st.st_mode) && !S_ISLNK(st.st_mode);
     }
     return false;
 }
@@ -87,20 +96,14 @@ bool is_whiteout(const char *filename) {
 }
 
 bool is_smth(const char *filename) {
-    return is_dir(filename) || is_executable(filename) 
-    || is_fifo(filename) || is_link(filename) 
-    || is_socket(filename) || is_whiteout(filename);
+    return is_dir(filename) || is_executable(filename) || is_fifo(filename) || is_link(filename) || is_socket(filename) || is_whiteout(filename);
 }
 
 bool is_smth_except_dir(const char *filename) {
-    return is_executable(filename) 
-    || is_fifo(filename) || is_link(filename) 
-    || is_socket(filename) || is_whiteout(filename);
+    return is_executable(filename) || is_fifo(filename) || is_link(filename) || is_socket(filename) || is_whiteout(filename);
 }
 
-
-
-void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*comparator)(const void *, const void *, bool), s_flags_t *flags) {
+void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*comparator)(const void *, const void *, bool), t_flags_s *flags) {
     for (size_t i = 0; i < num_elements - 1; ++i) {
         for (size_t j = i + 1; j < num_elements; ++j) {
             void *element_i = (char *)base + i * element_size;
@@ -114,6 +117,7 @@ void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*co
         }
     }
 }
+
 char *format_size(long size) {
     char *suffix[] = {"B", "K", "M", "G", "T"};
     int i;
@@ -143,6 +147,7 @@ char *format_size(long size) {
     result = mx_strjoin(result, suffix[i]);
     return result;
 }
+
 int is_directory_exists(const char *dirname) {
     DIR *dir = opendir(dirname);
 
@@ -151,8 +156,9 @@ int is_directory_exists(const char *dirname) {
         return 1;
     }
 
-    return 0; 
+    return 0;
 }
+
 int is_directory_empty(const char *dirname) {
     DIR *dir = opendir(dirname);
     if (dir == NULL) {
@@ -175,11 +181,13 @@ int is_directory_empty(const char *dirname) {
 
     return file == 0;
 }
+
 int is_file_exists(const char *dirname) {
     struct stat buffer;
     return stat(dirname, &buffer) == 0;
 }
-void init_flags(s_flags_t *flags) {
+
+void init_flags(t_flags_s *flags) {
     flags->one = false;
     flags->C = false;
     flags->m = false;
@@ -207,47 +215,43 @@ void init_flags(s_flags_t *flags) {
     flags->n = false;
     flags->i = false;
 }
+
 char **get_xattr(const char *filename) {
     char buffer[1024] = {'\0'};
     ssize_t count = listxattr(filename, buffer, sizeof(buffer), XATTR_NOFOLLOW);
-    // printf("%zd\n", count);
     for (int i = 0; i < count - 1; i++)
-        if (buffer[i] == '\0') buffer[i] = '|';
+        if (buffer[i] == '\0')
+            buffer[i] = '|';
 
-    if (count > 0) return mx_strsplit(buffer, '|');
+    if (count > 0)
+        return mx_strsplit(buffer, '|');
 
     return NULL;
 }
-FileEntry *fill_entry(const char *name, s_flags_t *flags) {
-    while (flags)
-        break;
+
+t_file_entry_s *fill_entry(const char *name, t_flags_s *flags) {
     struct stat sb;
-    // int fd = open(linkname, O_RDONLY);
-    // if (stat(linkname, &sb) == -1) {
-    //     perror("Cannot get directory information");
-    //     return NULL;
-    // }
-    // mx_printstr(linkname);
     if (lstat(name, &sb) == -1) {
         perror("Cannot get directory information");
         return NULL;
     }
-    FileEntry *file_entry = malloc(sizeof(FileEntry));
-    if(flags->i) file_entry->inode = sb.st_ino;
+    t_file_entry_s *file_entry = malloc(sizeof(t_file_entry_s));
+    if (flags->i)
+        file_entry->inode = sb.st_ino;
     file_entry->name = mx_strdup(name);
     file_entry->path = mx_strdup(name);
     if (S_ISLNK(sb.st_mode))
-            file_entry->type = 'l';
-        else if (S_ISSOCK(sb.st_mode))
-            file_entry->type = 's';
-        else if (S_ISCHR(sb.st_mode))
-            file_entry->type = 'c';
-        else if (S_ISFIFO(sb.st_mode))
-            file_entry->type = 'p';
-        else if (S_ISBLK(sb.st_mode))
-            file_entry->type = 'b';
-        else
-            file_entry->type = '-';
+        file_entry->type = 'l';
+    else if (S_ISSOCK(sb.st_mode))
+        file_entry->type = 's';
+    else if (S_ISCHR(sb.st_mode))
+        file_entry->type = 'c';
+    else if (S_ISFIFO(sb.st_mode))
+        file_entry->type = 'p';
+    else if (S_ISBLK(sb.st_mode))
+        file_entry->type = 'b';
+    else
+        file_entry->type = '-';
 
     char *new_permissions = NULL;
     new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IRUSR) ? "r" : "-");
@@ -259,8 +263,9 @@ FileEntry *fill_entry(const char *name, s_flags_t *flags) {
     new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IROTH) ? "r" : "-");
     new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IWOTH) ? "w" : "-");
     new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IXOTH) ? "x" : "-");
-    new_permissions = mx_strjoin(new_permissions, (listxattr(name, NULL, 0, 0x0001) > 0) ? "@" : (acl_get_file(name, ACL_TYPE_EXTENDED)) ? "+" : " ");
-                                                                                                                                                 
+    new_permissions = mx_strjoin(new_permissions, (listxattr(name, NULL, 0, 0x0001) > 0) ? "@" : (acl_get_file(name, ACL_TYPE_EXTENDED)) ? "+"
+                                                                                                                                         : " ");
+
     if (S_ISLNK(sb.st_mode))
         readlink(name, file_entry->symlink, sizeof(file_entry->symlink));
     if ((unsigned long)mx_strlen(new_permissions) < sizeof(file_entry->permissions)) {
@@ -275,7 +280,7 @@ FileEntry *fill_entry(const char *name, s_flags_t *flags) {
 
     struct passwd *pw = getpwuid(sb.st_uid);
     struct group *gr = getgrgid(sb.st_gid);
-    if(!flags->n) {
+    if (!flags->n) {
         mx_strcpy(file_entry->owner, pw->pw_name);
         mx_strcpy(file_entry->group, gr->gr_name);
     }
@@ -293,10 +298,14 @@ FileEntry *fill_entry(const char *name, s_flags_t *flags) {
     }
 
     struct timespec timesp = sb.st_mtimespec;
-    if(flags->c) timesp = sb.st_ctimespec;
-    if(flags->u) timesp = sb.st_atimespec;
-    if(flags->U) timesp = sb.st_birthtimespec;
-    if(flags->t) file_entry->cmptime = timesp;
+    if (flags->c)
+        timesp = sb.st_ctimespec;
+    if (flags->u)
+        timesp = sb.st_atimespec;
+    if (flags->U)
+        timesp = sb.st_birthtimespec;
+    if (flags->t)
+        file_entry->cmptime = timesp;
     char *str = ctime(&timesp.tv_sec);
     char **arr = mx_strsplit(str, ' ');
     time_t now = time(NULL);
@@ -310,7 +319,6 @@ FileEntry *fill_entry(const char *name, s_flags_t *flags) {
                 new_date_time = mx_strjoin(new_date_time, " ");
             }
             new_date_time = mx_strjoin(new_date_time, arr[i]);
-
 
             if (arr[i + 1] != NULL) {
                 new_date_time = mx_strjoin(new_date_time, " ");
@@ -372,8 +380,9 @@ FileEntry *fill_entry(const char *name, s_flags_t *flags) {
 
     return file_entry;
 }
+
 void switch_strcolor(struct stat sb) {
-switch (sb.st_mode & S_IFMT) {
+    switch (sb.st_mode & S_IFMT) {
     case S_IFBLK:
         mx_printstr(BLUE_COLOR);
         break;
@@ -400,24 +409,13 @@ switch (sb.st_mode & S_IFMT) {
 
     default:
         if (sb.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
-            // if (sb.st_mode & S_ISUID) {
-            //     mx_printstr("\033[30;41m");
-            // } else if (sb.st_mode & S_ISGID) {
-            //     mx_printstr("\033[30;46m");
-            // } else {
-                mx_printstr(RED_COLOR);
-            // }
+            mx_printstr(RED_COLOR);
         }
-        // mx_printstr(DEFAULT_COLOR);
         break;
     }
 }
-double custom_round(double value) {
-    double result = value + 0.5;
-    return (long)result;
-}
 
-FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) {
+t_file_entry_s *fill_file_entries(const char *dirname, int *count, t_flags_s *flags) {
     DIR *dir;
     struct dirent *entry;
     struct stat sb;
@@ -428,13 +426,15 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
     }
     *count = 0;
     while ((entry = readdir(dir)) != NULL) {
-        if ((mx_strcmp(entry->d_name, ".") == 0 || mx_strcmp(entry->d_name, "..") == 0) && flags->A) continue;
-        if (entry->d_name[0] == '.' && !flags->a) continue;
+        if ((mx_strcmp(entry->d_name, ".") == 0 || mx_strcmp(entry->d_name, "..") == 0) && flags->A)
+            continue;
+        if (entry->d_name[0] == '.' && !flags->a)
+            continue;
         (*count)++;
     }
     closedir(dir);
 
-    FileEntry *file_entries = malloc(*count * sizeof(FileEntry));
+    t_file_entry_s *file_entries = malloc(*count * sizeof(t_file_entry_s));
     if (file_entries == NULL) {
         perror("malloc");
         return NULL;
@@ -449,22 +449,20 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
 
     int index = 0;
     while ((entry = readdir(dir)) != NULL) {
-        if ((mx_strcmp(entry->d_name, ".") == 0 || mx_strcmp(entry->d_name, "..") == 0) && flags->A) continue;
-        if (entry->d_name[0] == '.' && !flags->a) continue;
+        if ((mx_strcmp(entry->d_name, ".") == 0 || mx_strcmp(entry->d_name, "..") == 0) && flags->A)
+            continue;
+        if (entry->d_name[0] == '.' && !flags->a)
+            continue;
 
         file_path = mx_strjoin(mx_strjoin(dirname, "/"), entry->d_name);
 
-        // int fd = open("/path/to/your/file");;
         if (lstat(file_path, &sb) == -1) {
             perror("Cannot get file information");
             continue;
         }
-        // if (lstat(file_path, &sb) == -1) {
-        //     perror("Cannot get file information");
-        //     continue;
-        // }
-        FileEntry *file_entry = &file_entries[index];
-        if(flags->i) file_entry->inode = sb.st_ino;
+        t_file_entry_s *file_entry = &file_entries[index];
+        if (flags->i)
+            file_entry->inode = sb.st_ino;
         file_entry->name = mx_strdup(entry->d_name);
         file_entry->path = mx_strdup(file_path);
         if (file_entry->name == NULL) {
@@ -499,7 +497,7 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
         new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IWOTH) ? "w" : "-");
         new_permissions = mx_strjoin(new_permissions, (sb.st_mode & S_IXOTH) ? "x" : "-");
         new_permissions = mx_strjoin(new_permissions, (listxattr(file_path, NULL, 0, XATTR_NOFOLLOW) > 0) ? "@" : (acl_get_file(file_path, ACL_TYPE_EXTENDED)) ? "+"
-                                                                                                                                                       : " ");
+                                                                                                                                                               : " ");
         if (S_ISLNK(sb.st_mode))
             readlink(file_path, file_entry->symlink, sizeof(file_entry->symlink));
         if ((unsigned long)mx_strlen(new_permissions) < sizeof(file_entry->permissions)) {
@@ -514,7 +512,7 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
 
         struct passwd *pw = getpwuid(sb.st_uid);
         struct group *gr = getgrgid(sb.st_gid);
-        if(!flags->n) {
+        if (!flags->n) {
             mx_strcpy(file_entry->owner, pw->pw_name);
             mx_strcpy(file_entry->group, gr->gr_name);
         }
@@ -532,10 +530,14 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
         }
 
         struct timespec timesp = sb.st_mtimespec;
-        if(flags->c) timesp = sb.st_ctimespec;
-        if(flags->u) timesp = sb.st_atimespec;
-        if(flags->U) timesp = sb.st_birthtimespec;
-        if(flags->t) file_entry->cmptime = timesp;
+        if (flags->c)
+            timesp = sb.st_ctimespec;
+        if (flags->u)
+            timesp = sb.st_atimespec;
+        if (flags->U)
+            timesp = sb.st_birthtimespec;
+        if (flags->t)
+            file_entry->cmptime = timesp;
         char *str = ctime(&timesp.tv_sec);
         char **arr = mx_strsplit(str, ' ');
         time_t now = time(NULL);
@@ -544,9 +546,7 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
         char *new_date_time = NULL;
         if (flags->T) {
 
-
             for (int i = 1; arr[i] != NULL; i++) {
-
 
                 int spaces = 2 - mx_strlen(arr[i]);
                 for (int i = 0; i < spaces; i++) {
@@ -554,13 +554,10 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
                 }
                 new_date_time = mx_strjoin(new_date_time, arr[i]);
 
-
                 if (arr[i + 1] != NULL) {
                     new_date_time = mx_strjoin(new_date_time, " ");
                 }
             }
-
-
         }
         else if (timesp.tv_sec + six_months_sec <= now || timesp.tv_sec >= now + six_months_sec) {
             new_date_time = mx_strjoin(new_date_time, arr[1]);
@@ -616,8 +613,6 @@ FileEntry *fill_file_entries(const char *dirname, int *count, s_flags_t *flags) 
         index++;
 
         file_entry->xattr_keys = get_xattr(file_path);
-        // if(file_entry->xattr_keys != NULL)
-        //     printf("%s\n", file_entry->xattr_keys[0]);
     }
 
     closedir(dir);
