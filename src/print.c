@@ -1,6 +1,6 @@
 #include "uls.h"
 
-static void printint_formatted(int n, int width) {
+void printint_formatted(int n, int width) {
     int num_width = 0;
     int temp = n;
 
@@ -15,7 +15,7 @@ static void printint_formatted(int n, int width) {
     mx_printint(n);
 }
 
-static void printstr_formatted(char *str, int wid, bool right) {
+void printstr_formatted(char *str, int wid, bool right) {
     if (!right)
         mx_printstr(str);
     for (int i = 0; i < wid - mx_strlen(str); i++)

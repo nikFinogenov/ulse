@@ -79,6 +79,13 @@ typedef struct {
 } t_max_sizes_s;
 
 
+void printint_formatted(int n, int width);
+char *format_size(long size);
+char **get_xattr(const char *filename);
+void printstr_formatted(char *str, int wid, bool right);
+void print_xattr(const t_file_entry_s *file_entry, t_flags_s *flags);
+void print_file_entry_s(const t_file_entry_s *file_entries, int i, t_max_sizes_s mxsize, t_flags_s *flags);
+void recursive_flag(const char *path, t_file_entry_s *file_entries, int count, t_flags_s *flags);
 bool is_smth_except_dir(const char *filename);
 bool is_smth(const char *filename);
 bool is_whiteout(const char *filename);

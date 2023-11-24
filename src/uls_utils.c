@@ -229,6 +229,40 @@ char **get_xattr(const char *filename) {
     return NULL;
 }
 
+void switch_strcolor(struct stat sb) {
+    switch (sb.st_mode & S_IFMT) {
+    case S_IFBLK:
+        mx_printstr(BLUE_COLOR);
+        break;
+
+    case S_IFCHR:
+        mx_printstr(BLUE_COLOR);
+        break;
+
+    case S_IFDIR:
+        mx_printstr(BLUE_COLOR);
+        break;
+
+    case S_IFIFO:
+        mx_printstr(YELLOW_COLOR);
+        break;
+
+    case S_IFLNK:
+        mx_printstr(MAGENTA_COLOR);
+        break;
+
+    case S_IFSOCK:
+        mx_printstr(GREEN_COLOR);
+        break;
+
+    default:
+        if (sb.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+            mx_printstr(RED_COLOR);
+        }
+        break;
+    }
+}
+
 t_file_entry_s *fill_entry(const char *name, t_flags_s *flags) {
     struct stat sb;
     if (lstat(name, &sb) == -1) {
@@ -379,40 +413,6 @@ t_file_entry_s *fill_entry(const char *name, t_flags_s *flags) {
     file_entry->xattr_keys = get_xattr(name);
 
     return file_entry;
-}
-
-void switch_strcolor(struct stat sb) {
-    switch (sb.st_mode & S_IFMT) {
-    case S_IFBLK:
-        mx_printstr(BLUE_COLOR);
-        break;
-
-    case S_IFCHR:
-        mx_printstr(BLUE_COLOR);
-        break;
-
-    case S_IFDIR:
-        mx_printstr(BLUE_COLOR);
-        break;
-
-    case S_IFIFO:
-        mx_printstr(YELLOW_COLOR);
-        break;
-
-    case S_IFLNK:
-        mx_printstr(MAGENTA_COLOR);
-        break;
-
-    case S_IFSOCK:
-        mx_printstr(GREEN_COLOR);
-        break;
-
-    default:
-        if (sb.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
-            mx_printstr(RED_COLOR);
-        }
-        break;
-    }
 }
 
 t_file_entry_s *fill_file_entries(const char *dirname, int *count, t_flags_s *flags) {
