@@ -1,7 +1,5 @@
 .DS_Store
 ._.DS_Store
-uls*
-ls*
 video*
 *.o
 *.out
@@ -12,8 +10,8 @@ video*
 obj
 test
 temp
-uls.txt
 file*
-irepe*
 ln*
 tests.sh
+uls.txt
+ls.txt
