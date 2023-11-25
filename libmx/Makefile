@@ -53,3 +53,4 @@ start:
 
 start_i: install
 	$(COMP) $(CFLG) main.c libmx.a && ./a.out
+	
