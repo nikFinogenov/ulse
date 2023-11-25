@@ -15,7 +15,6 @@
 #include <dirent.h>
 #include <string.h>
 #include <unistd.h>
-#include <string.h>
 
 #define DEFAULT_COLOR "\033[0m"
 #define BLUE_COLOR "\033[34m"
