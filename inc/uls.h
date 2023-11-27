@@ -77,7 +77,8 @@ typedef struct {
     int max_h_size_len;
 } t_max_sizes_s;
 
-
+int parse_file_input(int argc, char *argv[], char ***file_inputs);
+void print_err(const char *filename);
 void printint_formatted(int n, int width);
 char *format_size(long size);
 char **get_xattr(const char *filename);
@@ -107,7 +108,7 @@ void custom_qsort(void *base, size_t num_elements, size_t element_size, int (*co
 void init_flags(t_flags_s *flags);
 void print_longlist(const char *dirname, t_file_entry_s *file_entries, int count, t_flags_s *flags);
 t_file_entry_s *fill_file_entries(const char *dirname, int *count, t_flags_s *flags);
-t_file_entry_s *fill_entry(const char *linkname, t_flags_s *flags);
+t_file_entry_s *fill_entry(const char *name, t_flags_s *flags);
 int compare_file_entries_name(const void *a, const void *b, bool rev);
 int compare_file_entries_size(const void *a, const void *b, bool rev);
 int compare_file_entries_date_time(const void *a, const void *b, bool rev);

@@ -162,8 +162,9 @@ int is_directory_exists(const char *dirname) {
 int is_directory_empty(const char *dirname) {
     DIR *dir = opendir(dirname);
     if (dir == NULL) {
-        perror("opendir");
-        exit(EXIT_FAILURE);
+        // perror("opendir");
+        // exit(1);
+        return 1;
     }
 
     struct dirent *entry;
@@ -266,7 +267,6 @@ void switch_strcolor(struct stat sb) {
 t_file_entry_s *fill_entry(const char *name, t_flags_s *flags) {
     struct stat sb;
     if (lstat(name, &sb) == -1) {
-        perror("Cannot get directory information");
         return NULL;
     }
     t_file_entry_s *file_entry = malloc(sizeof(t_file_entry_s));
@@ -306,7 +306,6 @@ t_file_entry_s *fill_entry(const char *name, t_flags_s *flags) {
         mx_strcpy(file_entry->permissions, new_permissions);
     }
     else {
-        perror("Bad permisions");
         exit(1);
     }
     free(new_permissions);
@@ -393,7 +392,7 @@ t_file_entry_s *fill_entry(const char *name, t_flags_s *flags) {
         mx_strcpy(file_entry->date_time, new_date_time);
     }
     else {
-        perror("Bad time");
+        // perror("Bad time");
         exit(1);
     }
     free(new_date_time);
@@ -404,14 +403,15 @@ t_file_entry_s *fill_entry(const char *name, t_flags_s *flags) {
             file_entry->symlink[len] = '\0';
         }
         else {
-            perror("readlink");
+            // perror("readlink");
         }
     }
     else {
         file_entry->symlink[0] = '\0';
     }
     file_entry->xattr_keys = get_xattr(name);
-
+    // file_entries[i] = file_entry;
+    // }
     return file_entry;
 }
 
@@ -421,7 +421,6 @@ t_file_entry_s *fill_file_entries(const char *dirname, int *count, t_flags_s *fl
     struct stat sb;
     char *file_path;
     if (!(dir = opendir(dirname))) {
-        perror("Cannot open directory");
         return NULL;
     }
     *count = 0;
@@ -436,13 +435,11 @@ t_file_entry_s *fill_file_entries(const char *dirname, int *count, t_flags_s *fl
 
     t_file_entry_s *file_entries = malloc(*count * sizeof(t_file_entry_s));
     if (file_entries == NULL) {
-        perror("malloc");
         return NULL;
     }
 
     dir = opendir(dirname);
     if (dir == NULL) {
-        perror("Cannot open directory");
         free(file_entries);
         return NULL;
     }
@@ -457,7 +454,7 @@ t_file_entry_s *fill_file_entries(const char *dirname, int *count, t_flags_s *fl
         file_path = mx_strjoin(mx_strjoin(dirname, "/"), entry->d_name);
 
         if (lstat(file_path, &sb) == -1) {
-            perror("Cannot get file information");
+            // perror("Cannot get file information");
             continue;
         }
         t_file_entry_s *file_entry = &file_entries[index];
@@ -466,7 +463,7 @@ t_file_entry_s *fill_file_entries(const char *dirname, int *count, t_flags_s *fl
         file_entry->name = mx_strdup(entry->d_name);
         file_entry->path = mx_strdup(file_path);
         if (file_entry->name == NULL) {
-            perror("strdup");
+            // perror("strdup");
             free(file_entries->name);
             closedir(dir);
             return NULL;
@@ -504,7 +501,7 @@ t_file_entry_s *fill_file_entries(const char *dirname, int *count, t_flags_s *fl
             mx_strcpy(file_entry->permissions, new_permissions);
         }
         else {
-            perror("Bad permisions");
+            // perror("Bad permisions");
             exit(1);
         }
         free(new_permissions);
@@ -593,7 +590,7 @@ t_file_entry_s *fill_file_entries(const char *dirname, int *count, t_flags_s *fl
             mx_strcpy(file_entry->date_time, new_date_time);
         }
         else {
-            perror("Bad time");
+            // perror("Bad time");
             exit(1);
         }
         free(new_date_time);
@@ -604,7 +601,7 @@ t_file_entry_s *fill_file_entries(const char *dirname, int *count, t_flags_s *fl
                 file_entry->symlink[len] = '\0';
             }
             else {
-                perror("readlink");
+                // perror("readlink");
             }
         }
         else {
