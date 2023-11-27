@@ -61,10 +61,7 @@ void print_multicolumn(t_file_entry_s *file_entries, int count, t_flags_s *flags
             if (flags->G) {
                 struct stat sb;
 
-                if (lstat(file_entries[index].path, &sb) == -1) {
-                    // perror("Cannot get file information");
-                    continue;
-                }
+                if (lstat(file_entries[index].path, &sb) == -1) continue;
                 switch_strcolor(sb);
             }
             mx_printstr(file_entries[index].name);
@@ -172,10 +169,7 @@ void print_perline(t_file_entry_s *file_entries, int count, t_flags_s *flags) {
         }
         if (flags->G) {
             struct stat sb;
-            if (lstat(file_entries[i].path, &sb) == -1) {
-                // perror("Cannot get file information");
-                continue;
-            }
+            if (lstat(file_entries[i].path, &sb) == -1) continue;
             switch_strcolor(sb);
         }
         mx_printstr(file_entries[i].name);
@@ -247,9 +241,7 @@ void print_file_entry_s(const t_file_entry_s *file_entries, int i, t_max_sizes_s
     mx_printchar(' ');
     if (flags->G) {
         struct stat sb;
-        if (lstat(file_entries[i].path, &sb) == -1) {
-            // perror("Cannot get file information");
-        }
+        if (lstat(file_entries[i].path, &sb) == -1) {};
         switch_strcolor(sb);
     }
     mx_printstr(file_entries[i].name);
@@ -293,10 +285,7 @@ void print_longlist(const char *dirname, t_file_entry_s *file_entries, int count
         mx_printstr("total ");
 
         for (int i = 0; i < count; ++i) {
-            if (lstat(file_entries[i].path, &sb) == -1) {
-                // perror("Cannot get file information");
-                continue;
-            }
+            if (lstat(file_entries[i].path, &sb) == -1) continue;
             total_blocks += (int)(sb.st_blocks);
         }
         mx_printint(total_blocks);
@@ -386,9 +375,7 @@ void print_coma(t_file_entry_s *file_entries, int count, t_flags_s *flags) {
         }
         if (flags->G) {
             struct stat sb;
-            if (lstat(file_entries[i].path, &sb) == -1) {
-                // perror("Cannot get file information");
-            }
+            if (lstat(file_entries[i].path, &sb) == -1) {}
             switch_strcolor(sb);
         }
         mx_printstr(file_entries[i].name);

@@ -161,11 +161,7 @@ int is_directory_exists(const char *dirname) {
 
 int is_directory_empty(const char *dirname) {
     DIR *dir = opendir(dirname);
-    if (dir == NULL) {
-        // perror("opendir");
-        // exit(1);
-        return 1;
-    }
+    if (dir == NULL) return 1;
 
     struct dirent *entry;
     int file = 0;
@@ -391,10 +387,7 @@ t_file_entry_s *fill_entry(const char *name, t_flags_s *flags) {
     if ((unsigned long)mx_strlen(new_date_time) <= sizeof(file_entry->date_time)) {
         mx_strcpy(file_entry->date_time, new_date_time);
     }
-    else {
-        // perror("Bad time");
-        exit(1);
-    }
+    else exit(1);
     free(new_date_time);
 
     if (S_ISLNK(sb.st_mode)) {
@@ -402,16 +395,11 @@ t_file_entry_s *fill_entry(const char *name, t_flags_s *flags) {
         if (len != -1) {
             file_entry->symlink[len] = '\0';
         }
-        else {
-            // perror("readlink");
-        }
     }
     else {
         file_entry->symlink[0] = '\0';
     }
     file_entry->xattr_keys = get_xattr(name);
-    // file_entries[i] = file_entry;
-    // }
     return file_entry;
 }
 
@@ -432,7 +420,6 @@ t_file_entry_s *fill_file_entries(const char *dirname, int *count, t_flags_s *fl
         (*count)++;
     }
     closedir(dir);
-
     t_file_entry_s *file_entries = malloc(*count * sizeof(t_file_entry_s));
     if (file_entries == NULL) {
         return NULL;
@@ -453,17 +440,13 @@ t_file_entry_s *fill_file_entries(const char *dirname, int *count, t_flags_s *fl
 
         file_path = mx_strjoin(mx_strjoin(dirname, "/"), entry->d_name);
 
-        if (lstat(file_path, &sb) == -1) {
-            // perror("Cannot get file information");
-            continue;
-        }
+        if (lstat(file_path, &sb) == -1) continue;
         t_file_entry_s *file_entry = &file_entries[index];
         if (flags->i)
             file_entry->inode = sb.st_ino;
         file_entry->name = mx_strdup(entry->d_name);
         file_entry->path = mx_strdup(file_path);
         if (file_entry->name == NULL) {
-            // perror("strdup");
             free(file_entries->name);
             closedir(dir);
             return NULL;
@@ -500,10 +483,7 @@ t_file_entry_s *fill_file_entries(const char *dirname, int *count, t_flags_s *fl
         if ((unsigned long)mx_strlen(new_permissions) < sizeof(file_entry->permissions)) {
             mx_strcpy(file_entry->permissions, new_permissions);
         }
-        else {
-            // perror("Bad permisions");
-            exit(1);
-        }
+        else exit(1);
         free(new_permissions);
         file_entry->nlinks = (int)sb.st_nlink;
 
@@ -589,19 +569,13 @@ t_file_entry_s *fill_file_entries(const char *dirname, int *count, t_flags_s *fl
         if ((unsigned long)mx_strlen(new_date_time) <= sizeof(file_entry->date_time)) {
             mx_strcpy(file_entry->date_time, new_date_time);
         }
-        else {
-            // perror("Bad time");
-            exit(1);
-        }
+        else exit(1);
         free(new_date_time);
 
         if (S_ISLNK(sb.st_mode)) {
             ssize_t len = readlink(file_path, file_entry->symlink, sizeof(file_entry->symlink) - 1);
             if (len != -1) {
                 file_entry->symlink[len] = '\0';
-            }
-            else {
-                // perror("readlink");
             }
         }
         else {

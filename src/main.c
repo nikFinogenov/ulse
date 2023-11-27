@@ -37,12 +37,14 @@ void recursive_flag(const char *path, t_file_entry_s *file_entries, int count, t
                 if(inner_file_entries == NULL) print_err(file_entries[i].path);
                 continue;
             }
+        if(inner_count) {
         if (flags->S)
             custom_qsort(inner_file_entries, inner_count, sizeof(t_file_entry_s), compare_file_entries_size, flags);
         else if (flags->t)
             custom_qsort(inner_file_entries, inner_count, sizeof(t_file_entry_s), compare_file_entries_date_time, flags);
         else if (!flags->f)
             custom_qsort(inner_file_entries, inner_count, sizeof(t_file_entry_s), compare_file_entries_name, flags);
+        }
         recursive_flag(file_entries[i].path, inner_file_entries, inner_count, flags);
         free(inner_file_entries);
     }
@@ -55,15 +57,12 @@ int main(int argc, char *argv[]) {
     char **dirs;
     char **err_dirs;
     char **input_files;
-    int count_args = parse_args(argc, argv, &flags);
+    parse_args(argc, argv, &flags);
     if (!isatty(1))
         flags.G = false;
     int count_dirs = parse_dirs(argc, argv, &dirs);
     int count_err_dirs = parse_err_dirs(argc, argv, &err_dirs);
     int count_file_input = parse_file_input(argc, argv, &input_files);
-    while (count_args) {
-        break;
-    }
     int real_count_dirs = count_dirs + count_err_dirs + count_file_input;
     t_file_entry_s *file_entries = malloc(count_file_input * sizeof(t_file_entry_s));
     t_file_entry_s *dir_entries = malloc(count_dirs * sizeof(t_file_entry_s));
@@ -77,7 +76,6 @@ int main(int argc, char *argv[]) {
         dir_entries[0].name = mx_strdup(dirname);
     }
     if (count_dirs != 0){
-        // custom_qsort(dirs, count_dirs, sizeof(char *), compare_names, &flags);
         if (flags.S)
             custom_qsort(dir_entries, count_dirs, sizeof(t_file_entry_s), compare_file_entries_size, &flags);
         else if (flags.t)
@@ -89,7 +87,6 @@ int main(int argc, char *argv[]) {
         custom_qsort(err_dirs, count_err_dirs, sizeof(char *), compare_names, &flags);
     if (count_file_input != 0)
         custom_qsort(input_files, count_file_input, sizeof(char *), compare_names, &flags);
-    
     for (int i = 0; i < count_err_dirs; i++) {
         print_err(err_dirs[i]);
     }
@@ -98,7 +95,6 @@ int main(int argc, char *argv[]) {
         file_entries[i] = *fill_entry(dirname, &flags);
     }
     if(count_file_input) {
-        // dirname = input_files[i];
         if (flags.S)
             custom_qsort(file_entries, count_file_input, sizeof(t_file_entry_s), compare_file_entries_size, &flags);
         else if (flags.t)
@@ -152,14 +148,18 @@ int main(int argc, char *argv[]) {
                 if(count_dirs >= 2 && i + 1 != count_dirs) mx_printchar('\n');
                 continue;
             }
-            
-        if (flags.S)
-            custom_qsort(file_entries, count_files, sizeof(t_file_entry_s), compare_file_entries_size, &flags);
-        else if (flags.t)
-            custom_qsort(file_entries, count_files, sizeof(t_file_entry_s), compare_file_entries_date_time, &flags);
-        else if (!flags.f)
-            custom_qsort(file_entries, count_files, sizeof(t_file_entry_s), compare_file_entries_name, &flags);
+            if(count_files) {
+                if (flags.S)
+                    custom_qsort(file_entries, count_files, sizeof(t_file_entry_s), compare_file_entries_size, &flags);
+                else if (flags.t)
+                    custom_qsort(file_entries, count_files, sizeof(t_file_entry_s), compare_file_entries_date_time, &flags);
+                else if (!flags.f){
+                    custom_qsort(file_entries, count_files, sizeof(t_file_entry_s), compare_file_entries_name, &flags);
+            }
+            }
 
+            
+        
         if (flags.R)
             recursive_flag(dirname, file_entries, count_files, &flags);
         else if (flags.l) {
