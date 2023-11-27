@@ -128,7 +128,7 @@ int parse_args(int argc, char *argv[], t_flags_s *flags) {
                     mx_printerr("uls: illegal option -- ");
                     mx_printerr(&argv[i][j]);
                     mx_printerr("\n");
-                    mx_printerr("usage: uls [-@ACFGHRSTUacefghlmnopqrtux1] [file ...]\n");
+                    mx_printerr("usage: uls [-@ACFGRSTUacefghlmnoprtux1] [file ...]\n");
                     exit(1);
                 }
             }
@@ -145,7 +145,7 @@ int parse_dirs(int argc, char *argv[], char ***dirs) {
 
     for (i = 1; i < argc; i++) {
         if (argv[i][0] != '-') {
-            if (is_directory_exists(argv[i]) || is_file_exists(argv[i])) {
+            if (is_dir(argv[i]) && (is_directory_exists(argv[i]) || is_file_exists(argv[i]))) {
                 (*dirs)[dir_count] = mx_strdup(argv[i]);
                 dir_count++;
             }
@@ -168,4 +168,20 @@ int parse_err_dirs(int argc, char *argv[], char ***err_dirs) {
         }
     }
     return err_dir_count;
+}
+
+int parse_file_input(int argc, char *argv[], char ***file_inputs) {
+    int i, file_inputs_count = 0;
+
+    *file_inputs = malloc((argc - 1) * sizeof(char *));
+
+    for (i = 1; i < argc; i++) {
+        if (argv[i][0] != '-') {
+            if (!is_dir(argv[i]) && is_file_exists(argv[i])) {
+                (*file_inputs)[file_inputs_count] = mx_strdup(argv[i]);
+                file_inputs_count++;
+            }
+        }
+    }
+    return file_inputs_count;
 }
